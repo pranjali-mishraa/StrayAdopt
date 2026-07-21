@@ -51,4 +51,8 @@ async function loginUserController(req, res) {
     }
 }
 
-module.exports = { registerUserController, loginUserController };
+async function getMeController(req, res) {
+    return res.status(200).json({ user: req.user });
+}
+
+module.exports = { registerUserController, loginUserController , getMeController};
