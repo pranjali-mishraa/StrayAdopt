@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import AuthShell from "../components/AuthShell";
 import Field from "../components/FormField";
 import { useAuthService } from "../hooks/useAuthService";
-
+import { Spinner } from "../components/AuthIcons";
 export default function Register() {
   const { handleRegister, loading } = useAuthService();
   const navigate = useNavigate();

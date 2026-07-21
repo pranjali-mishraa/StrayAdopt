@@ -1,6 +1,7 @@
 const userModel = require("../models/user.model");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const blacklistTokenModel = require("../models/blacklistToken.model");
 
 async function registerUser({ username, email, password }) {
     const existingUser = await userModel.findOne({ email });
@@ -52,4 +53,26 @@ async function loginUser({ email, password }) {
     };
 }
 
-module.exports = { registerUser, loginUser };
+async function logoutUser(token){
+
+    if(!token){
+      const error = new Error("token not provided")
+      error.statusCode = 400 
+      throw error;
+    }
+
+        const decoded = jwt.decode(token); 
+        await blacklistTokenModel.create({
+            token,
+            expiresAt: new Date(decoded.exp * 1000), 
+        });
+    
+}
+
+// special function for middleware 
+async function isTokenBlacklisted(token) {
+    const found = await blacklistTokenModel.findOne({ token });
+    return !!found;
+}
+
+module.exports = { registerUser, loginUser  , logoutUser , isTokenBlacklisted };

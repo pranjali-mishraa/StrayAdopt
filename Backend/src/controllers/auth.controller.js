@@ -55,4 +55,23 @@ async function getMeController(req, res) {
     return res.status(200).json({ user: req.user });
 }
 
-module.exports = { registerUserController, loginUserController , getMeController};
+
+async function logoutUserController(req, res) {
+    try {
+        const token = req.cookies.token;
+         await authService.logoutUser(token)
+        res.clearCookie("token", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+        });
+
+        return res.status(200).json({ message: "Logged out successfully" });
+    } catch (error) {
+        return res.status(500).json({ message: "Something went wrong", error: error.message });
+    }
+}
+
+
+
+module.exports = { registerUserController, loginUserController , getMeController , logoutUserController};

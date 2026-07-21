@@ -26,8 +26,18 @@ authRouter.post('/login' , authController.loginUserController);
  * @description get user details of self when user clicks on profile
  * @access Private
  */
- 
+
+
 authRouter.get('/me',protect , authController.getMeController)
+
+
+/**
+ * @route POST /api/auth/logout
+ * @description logout user clear the cookie and add to blacklistSchema
+ * @access Private
+ */
+
+authRouter.post('/logout' ,protect, authController.logoutUserController)
 
 module.exports = authRouter 
 
