@@ -15,6 +15,7 @@ app.use(cookieParser())
 
 /* require all routes here */
 const authRouter = require('./src/routes/auth.routes');
+const postRouter = require('./src/routes/post.routes');
 
 
 /* use all routes here */
@@ -27,5 +28,6 @@ app.get("/api/health", (req, res) => {
   });
 
   app.use('/api/auth',authRouter);
+  app.use('/api/posts/',postRouter);
 
 module.exports = app ;

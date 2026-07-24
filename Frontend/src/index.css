@@ -1,23 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --color-cream: #F5EAD9;
-  --color-warm: #FBF3E7;
-  --color-bark: #8A7563;
-  --color-bark-dark: #3E2E22;
-  --color-rust: #C1652F;
-  --color-border-brand: #E5D8C3;
-  --color-text: #3E2E22;
-  --color-text-mid: #5B4A3A;
-  --color-text-light: #7A6A5A;
+  
+  --color-cream:       #FDF6EE;
+  --color-warm:        #F5EAD8;
+  --color-tan:         #E8D5BE;
+  --color-bark:        #8B6F47;
+  --color-bark-dark:   #5C4329;
+  --color-rust:        #C0572A;
+  --color-rust-hover:  #A34420;
+  --color-sage:        #6B8F71;
+  --color-sage-light:  #EDF3EE;
+  --color-border-brand:#D6C5B0;
+  --color-text-main:   #2A1F14;
+  --color-text-mid:    #6B5744;
+  --color-text-light:  #9C876F;
 
-  --font-display: "Georgia", "Playfair Display", serif;
+  
+  --font-sans:    "DM Sans", sans-serif;
+  --font-display: "Fraunces", serif;
+
+
+  --animate-slide-down: slideDown 0.4s cubic-bezier(0.22,1,0.36,1) both;
+  --animate-drop-in:    dropIn 0.2s cubic-bezier(0.22,1,0.36,1) both;
+  --animate-float:      float 4s ease-in-out infinite;
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes dropIn {
+    from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-8px); }
+  }
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-12px); }
-}
-.animate-float {
-  animation: float 6s ease-in-out infinite;
+@layer base {
+  html { scroll-behavior: smooth; }
+  body {
+    background-color: var(--color-cream);
+    color: var(--color-text-main);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
 }

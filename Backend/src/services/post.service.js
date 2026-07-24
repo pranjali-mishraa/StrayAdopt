@@ -4,7 +4,7 @@ const postModel = require("../models/post.model");
 function uploadImageToCloudinary(fileBuffer){
     return new Promise ((resolve, reject)=>{
         const stream = cloudinary.uploader.upload_stream(
-            {folder : strayAdopt/posts},
+            {folder : "strayAdopt/posts"},
             
             (error , result)=>{
                 if(error){
@@ -32,7 +32,7 @@ async function createPost({postBy , description , location , files}){
         throw error ; 
     }
 
-    const uploadPromises = files.map((file)=>uploadImageToCloudinary(file.Buffer))
+    const uploadPromises = files.map((file)=>uploadImageToCloudinary(file.buffer))
     const imageUrls = await Promise.all(uploadPromises);
 
     const post = await postModel.create({
