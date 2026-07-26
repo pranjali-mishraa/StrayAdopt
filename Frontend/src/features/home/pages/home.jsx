@@ -32,25 +32,33 @@ export default function Home() {
         <HowItWorks/>
 
 
-        <section className="py-20">
-          <div className="flex justify-between items-center mb-10">
-              <div>
-                  <h2 className="font-display text-4xl">
-                      Latest Pets
-                  </h2>
-                  <p className="text-text-mid">
-                      Recently posted pets looking for a forever home.
-                  </p>
-              </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-              {latestPosts.map((post) => (
-                  <PetCard
-                      key={post._id}
-                      post={post}
-                  />
-              ))}
-          </div>
+        <section className="max-w-7xl mx-auto px-6 lg:px-10 py-20">
+  <div className="flex justify-between items-center mb-10">
+    <div>
+      <h2 className="font-display text-4xl text-bark-dark">Latest Pets</h2>
+      <p className="text-text-mid mt-1">
+        Recently posted pets looking for a forever home.
+      </p>
+    </div>
+  </div>
+
+  {loading ? (
+    <p className="text-center text-text-light py-10">Loading pets...</p>
+  ) : latestPosts.length === 0 ? (
+    <p className="text-center text-text-light py-10">No pets posted yet.</p>
+  ) : (
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+      {latestPosts.map((post, i) => (
+        <div
+          key={post._id}
+          className="animate-slide-down"
+          style={{ animationDelay: `${i * 80}ms`, animationFillMode: "backwards" }}
+        >
+          <PetCard post={post} />
+        </div>
+      ))}
+    </div>
+  )}
 </section>
     </main>
   );

@@ -3,22 +3,25 @@ import { Link } from "react-router-dom";
 
 export default function PetCard({ post }) {
   const [activeImage, setActiveImage] = useState(0);
+
+  if (!post) return null;
+
   const images = post.images || [];
   const hasMultipleImages = images.length > 1;
 
   return (
-    <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-border-brand flex flex-col">
+    <div className="group bg-white rounded-3xl overflow-hidden shadow-sm border border-border-brand flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
       {/* Image */}
       <div className="relative h-64 overflow-hidden">
         <img
           src={images[activeImage]}
           alt={post.description}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
         />
 
         {/* Status badge */}
-        <div className="absolute top-4 left-4 flex items-center gap-2 bg-sage-light px-4 py-1.5 rounded-full">
-          <span className="w-2 h-2 rounded-full bg-sage" />
+        <div className="absolute top-4 left-4 flex items-center gap-2 bg-sage-light px-4 py-1.5 rounded-full shadow-sm">
+          <span className="w-2 h-2 rounded-full bg-sage animate-pulse" />
           <span className="text-sm font-medium text-bark-dark capitalize">
             {post.status || "Available"}
           </span>
@@ -32,13 +35,16 @@ export default function PetCard({ post }) {
                 key={i}
                 onClick={() => setActiveImage(i)}
                 className={`h-1.5 rounded-full transition-all duration-300 ${
-                  i === activeImage ? "w-5 bg-white" : "w-1.5 bg-white/50"
+                  i === activeImage ? "w-5 bg-white" : "w-1.5 bg-white/50 hover:bg-white/80"
                 }`}
                 aria-label={`Show image ${i + 1}`}
               />
             ))}
           </div>
         )}
+
+        {/* Subtle gradient for readability of badge/dots */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
       </div>
 
       {/* Content */}
@@ -71,13 +77,16 @@ export default function PetCard({ post }) {
 
         <Link
           to={`/chats?with=${post.postBy?._id}&post=${post._id}`}
-          className="mt-auto inline-flex items-center justify-center gap-2 bg-rust hover:bg-rust-hover text-white font-medium py-3.5 rounded-xl transition-colors"
+          className="mt-auto inline-flex items-center justify-center gap-2 bg-rust hover:bg-rust-hover text-white font-medium py-3.5 rounded-xl transition-all duration-300 active:scale-95"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
           </svg>
           Message Owner
         </Link>
+{/* 
+        {actions && <div className="mt-3">{actions}</div>} */}
+
       </div>
     </div>
   );

@@ -75,7 +75,29 @@ async function getAllPosts({ page = 1, limit = 12 }) {
     };
 }
 
-module.exports = { createPost, getLatestPosts, getAllPosts };
+async function getMyPosts(userId){
+const posts = await postModel.find({postBy:userId})
+            .sort({createdAt:-1})
+            .populate("postBy" , "username email")
+    return posts
+}
+
+
+async function getPostById(postId){
+    const post = await postModel.findById(postId)
+                    .populate("postBy" , "username email")
+
+    if(!post){
+        const error = new Error("Post not found");
+        error.statusCode = 404;
+        throw error;
+    }
+
+    return post; 
+
+}
+
+module.exports = { createPost, getLatestPosts, getAllPosts , getMyPosts , getPostById};
 
 
 

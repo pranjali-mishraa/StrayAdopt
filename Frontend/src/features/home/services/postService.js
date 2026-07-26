@@ -33,3 +33,7 @@ export async function getAllPosts(page = 1, limit = 12) {
     return response.data;
 }
 
+export async function getMyPosts() {
+    const response = await api.get("/api/posts/getMyPosts");
+    return response.data;
+}

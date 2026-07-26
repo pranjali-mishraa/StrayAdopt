@@ -48,4 +48,24 @@ async function getAllPostsController(req, res) {
     }
 }
 
-module.exports = { createPostController, getLatestPostsController, getAllPostsController };
+async function getMyPostsController(req, res) {
+    try {
+        const posts = await postService.getMyPosts(req.user._id);
+        return res.status(200).json({ posts });
+    } catch (error) {
+        return res.status(500).json({ message: "Something went wrong", error: error.message });
+    }
+}
+
+async function getPostByIdController(req, res) {
+    try {
+        const post = await postService.getPostById(req.params.id);
+        return res.status(200).json({ post });
+    } catch (error) {
+        return res.status(error.statusCode || 500).json({
+            message: error.message || "Something went wrong",
+        });
+    }
+}
+
+module.exports = { createPostController, getLatestPostsController, getAllPostsController , getMyPostsController , getPostByIdController};

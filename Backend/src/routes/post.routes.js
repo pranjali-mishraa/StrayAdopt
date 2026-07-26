@@ -34,4 +34,22 @@ postRouter.get('/latest' , postController.getLatestPostsController);
 
 postRouter.get('/allPosts' , postController.getAllPostsController)
 
+
+
+/**
+ * @route GET /api/posts/getMyPosts
+ * @description get posts posted by logged in user
+ * @access only logged in user can see their own posts
+ */
+
+postRouter.get('/getMyPosts' ,protect, postController.getMyPostsController)
+
+
+/**
+ * @route GET /api/posts/:id
+ * @description get full details of the single post 
+ * @access public
+ */
+postRouter.get('/:id' , postController.getPostByIdController)
+
 module.exports = postRouter;
