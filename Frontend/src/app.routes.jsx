@@ -7,6 +7,9 @@ import Home from "./features/home/pages/home";
 import Profile from "./features/profilePage/pages/profile";
 import Protected from "./features/Components/Protected";
 import CreatePost from "./features/createPost/createPost";
+import PostDetails from "./features/postDetails/PostDetails";
+import EditPost from "./features/createPost/editPosts";
+
 export const router = createBrowserRouter([
     {
         element: <Layout/>,
@@ -28,6 +31,15 @@ export const router = createBrowserRouter([
                   </Protected>
                 ),
               },
+              { path: "/pets/:id", element: <PostDetails /> },
+              {
+                path: "/edit-post/:id",
+                element: (
+                  <Protected>
+                    <EditPost />
+                  </Protected>
+                ),
+              }
         ]
 
     },

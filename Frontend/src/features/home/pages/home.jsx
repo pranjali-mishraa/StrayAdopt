@@ -3,11 +3,14 @@ import HowItWorks from "../components/HowItWorks";
 import PetCard from "../../Components/PetCard";
 import LandingPage from "../components/LandingPage";
 import {getLatestPosts} from "../services/postService"
+
+
 export default function Home() {
+
 
   const [latestPosts, setLatestPosts] = useState([]);
     const [loading, setLoading] = useState(true);
-
+   
     useEffect(() => {
         async function fetchLatestPosts() {
             try {

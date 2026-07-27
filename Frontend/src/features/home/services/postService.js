@@ -37,3 +37,8 @@ export async function getMyPosts() {
     const response = await api.get("/api/posts/getMyPosts");
     return response.data;
 }
+
+export async function getPostById(id) {
+    const response = await api.get(`/api/posts/${id}`);
+    return response.data;
+}

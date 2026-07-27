@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getMyPosts } from "../../home/services/postService";
 import PetCard from "../../Components/PetCard";
+import MyPostActions from "../../createPost/MyPostAction";
 export default function Profile() {
   const { user, handleLogout } = useAuthService();
   const navigate = useNavigate();
@@ -73,8 +74,23 @@ export default function Profile() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
             {myPosts.map((post) => (
-              <PetCard key={post._id} post={post} />
-            ))}
+  <PetCard
+    key={post._id}
+    post={post}
+    isOwner
+    actions={
+      <MyPostActions
+        post={post}
+        onDeleted={(id) => setMyPosts((prev) => prev.filter((p) => p._id !== id))}
+        onStatusChanged={(id, newStatus) =>
+          setMyPosts((prev) =>
+            prev.map((p) => (p._id === id ? { ...p, status: newStatus } : p))
+          )
+        }
+      />
+    }
+  />
+))}
           </div>
         )}
       </div>

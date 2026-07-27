@@ -68,4 +68,66 @@ async function getPostByIdController(req, res) {
     }
 }
 
-module.exports = { createPostController, getLatestPostsController, getAllPostsController , getMyPostsController , getPostByIdController};
+async function updateDescriptionController(req, res) {
+    try {
+        const post = await postService.updateDescription(req.params.id, req.user._id, req.body.description);
+        return res.status(200).json({ message: "Description updated", post });
+    } catch (error) {
+        return res.status(error.statusCode || 500).json({ message: error.message || "Something went wrong" });
+    }
+}
+
+async function updateLocationController(req, res) {
+    try {
+        const post = await postService.updateLocation(req.params.id, req.user._id, req.body.location);
+        return res.status(200).json({ message: "Location updated", post });
+    } catch (error) {
+        return res.status(error.statusCode || 500).json({ message: error.message || "Something went wrong" });
+    }
+}
+
+async function updateImagesController(req, res) {
+    try {
+        const keepImages = req.body.keepImages ? JSON.parse(req.body.keepImages) : undefined;
+
+        const post = await postService.updateImages(req.params.id, req.user._id, {
+            newFiles: req.files,
+            keepImages,
+        });
+
+        return res.status(200).json({ message: "Images updated", post });
+    } catch (error) {
+        return res.status(error.statusCode || 500).json({ message: error.message || "Something went wrong" });
+    }
+}
+
+async function toggleAdoptedStatusController(req, res) {
+    try {
+        const post = await postService.toggleAdoptedStatus(req.params.id, req.user._id);
+        return res.status(200).json({ message: "Status updated", post });
+    } catch (error) {
+        return res.status(error.statusCode || 500).json({ message: error.message || "Something went wrong" });
+    }
+}
+
+async function deletePostController(req, res) {
+    try {
+        await postService.deletePost(req.params.id, req.user._id);
+        return res.status(200).json({ message: "Post deleted successfully" });
+    } catch (error) {
+        return res.status(error.statusCode || 500).json({ message: error.message || "Something went wrong" });
+    }
+}
+
+
+module.exports = { createPostController,
+     getLatestPostsController,
+      getAllPostsController,
+       getMyPostsController,
+        getPostByIdController,
+         updateDescriptionController,
+         updateImagesController,
+         updateLocationController,
+         toggleAdoptedStatusController,
+         deletePostController
+        };

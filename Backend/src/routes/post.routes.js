@@ -52,4 +52,40 @@ postRouter.get('/getMyPosts' ,protect, postController.getMyPostsController)
  */
 postRouter.get('/:id' , postController.getPostByIdController)
 
+
+/**
+ * @route PATCH /api/posts/:id/description
+ * @description update only the description (owner only)
+ * @access private
+ */
+postRouter.patch('/:id/description', protect, postController.updateDescriptionController);
+
+/**
+ * @route PATCH /api/posts/:id/location
+ * @description update only the location (owner only)
+ * @access private
+ */
+postRouter.patch('/:id/location', protect, postController.updateLocationController);
+
+/**
+ * @route PATCH /api/posts/:id/images
+ * @description update the images array (owner only)
+ * @access private
+ */
+postRouter.patch('/:id/images', protect, upload.array("images", 5), postController.updateImagesController);
+
+/**
+ * @route PATCH /api/posts/:id/status
+ * @description toggle adopted/available status (owner only)
+ * @access private
+ */
+postRouter.patch('/:id/status', protect, postController.toggleAdoptedStatusController);
+
+/**
+ * @route DELETE /api/posts/:id
+ * @description delete a post (owner only)
+ * @access private
+ */
+postRouter.delete('/:id', protect, postController.deletePostController);
+
 module.exports = postRouter;
