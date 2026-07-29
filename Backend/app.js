@@ -16,18 +16,12 @@ app.use(cookieParser())
 /* require all routes here */
 const authRouter = require('./src/routes/auth.routes');
 const postRouter = require('./src/routes/post.routes');
-
+const conversationRouter = require('./src/routes/conversation.routes')
 
 /* use all routes here */
-app.get("/api/health", (req, res) => {
-    res.status(200).json({
-      status: "OK",
-      message: "Server is healthy",
-      timestamp: new Date().toISOString(),
-    });
-  });
 
   app.use('/api/auth',authRouter);
   app.use('/api/posts/',postRouter);
-
+  app.use('/api/conversations',conversationRouter)
+  
 module.exports = app ;

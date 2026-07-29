@@ -3,19 +3,19 @@ const messageModel = require("../models/message.model");
 
 async function findOrCreateConversation(userId , otherUserID){
 
-    if (userId.toString() === otherUserId.toString()) {
+    if (userId.toString() === otherUserID.toString()) {
         const error = new Error("You cannot start a conversation with yourself");
         error.statusCode = 400;
         throw error;
     }
 
     let conversation = await conversationModel.findOne({
-        participants: { $all: [userId, otherUserId] },
+        participants: { $all: [userId, otherUserID] },
     });
 
     if (!conversation) {
         conversation = await conversationModel.create({
-            participants: [userId, otherUserId],
+            participants: [userId, otherUserID],
         });
     }
 
@@ -34,7 +34,7 @@ async function getUserConversation(userId){
 }
 
 
-async function getConversationMessage(conversationId , userId){
+async function getConversationMessages(conversationId , userId){
 
     const conversation  = await conversationModel.findById(conversationId);
 
@@ -98,7 +98,7 @@ async function sendMessage(conversationId, senderId, text) {
 
 module.exports = {
     findOrCreateConversation,
-    getUserConversations,
+    getUserConversation,
     getConversationMessages,
     sendMessage,
 };

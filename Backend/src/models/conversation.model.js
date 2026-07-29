@@ -9,7 +9,7 @@ const conversationSchema  = new mongoose.Schema({
         required : true ,
         validate : {
             validator : function (arr){
-                return arr.length ===1;
+                return arr.length ===2;
             },
             message : " A conversation must have exactly 2 participants."
         },
