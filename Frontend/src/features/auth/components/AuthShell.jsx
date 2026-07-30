@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { PawPrint } from "lucide-react";
 
 export default function AuthShell({ mode, title, subtitle, children }) {
   const isLogin = mode === "login";
@@ -12,14 +13,16 @@ export default function AuthShell({ mode, title, subtitle, children }) {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200px] h-[200px] bg-rust/10 rounded-full blur-2xl animate-float" style={{ animationDelay: "1s" }} />
 
         <Link to="/" className="flex items-center gap-2.5 relative z-10">
-          <div className="w-[36px] h-[36px] bg-rust rounded-[10px] flex items-center justify-center text-[18px]">🐾</div>
+          <div className="w-[36px] h-[36px] bg-rust rounded-[10px] flex items-center justify-center text-cream">
+            <PawPrint size={18} />
+          </div>
           <span className="font-display text-[22px] font-semibold text-cream tracking-tight">
-            Stray<em className="italic text-rust">Opt</em>
+            Stray<em className="italic text-rust">Adopt</em>
           </span>
         </Link>
 
         <div className="relative z-10">
-          <div className="text-[72px] mb-6 animate-float inline-block">🐾</div>
+          <PawPrint size={72} className="text-cream mb-6 animate-float inline-block" />
           <h2 className="font-display text-[2.2rem] font-light text-cream leading-tight mb-4">
             Give a stray<br /><em className="italic text-rust">a reason to wag</em>
           </h2>
@@ -50,7 +53,7 @@ export default function AuthShell({ mode, title, subtitle, children }) {
 
       {/* Right form side */}
       <div className="flex-1 flex items-center justify-center px-6 py-12 relative overflow-hidden">
-        <div className="absolute bottom-[-40px] right-[-40px] text-[200px] opacity-[0.03] select-none pointer-events-none rotate-12">🐾</div>
+        <PawPrint size={200} className="absolute bottom-[-40px] right-[-40px] text-bark-dark opacity-[0.03] select-none pointer-events-none rotate-12" />
 
         <div className="w-full max-w-[420px] relative z-10">
           <div className="flex bg-warm rounded-2xl p-1 mb-8 border border-border-brand">

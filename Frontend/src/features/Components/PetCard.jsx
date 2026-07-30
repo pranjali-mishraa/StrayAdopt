@@ -6,6 +6,7 @@ export default function PetCard({ post, actions  }) {
   const [activeImage, setActiveImage] = useState(0);
   const navigate = useNavigate();
   const { user } = useAuthService();
+
   const isOwner = user?._id === post?.postBy?._id;
 
 

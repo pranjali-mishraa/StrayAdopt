@@ -9,6 +9,7 @@ import Protected from "./features/Components/Protected";
 import CreatePost from "./features/createPost/createPost";
 import PostDetails from "./features/postDetails/PostDetails";
 import EditPost from "./features/createPost/editPosts";
+import ChatPage from "./features/chat/pages/ChatPage";
 
 export const router = createBrowserRouter([
     {
@@ -39,6 +40,14 @@ export const router = createBrowserRouter([
                     <EditPost />
                   </Protected>
                 ),
+              },
+              {
+                path: "/chats",
+                element: <Protected><ChatPage /></Protected>
+              },
+              {
+                path: "/chat/:conversationId",
+                element: <Protected><ChatPage /></Protected>
               }
         ]
 

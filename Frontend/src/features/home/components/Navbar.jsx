@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthService } from "../../auth/hooks/useAuthService";
+import { PawPrint } from "lucide-react";
 
 export default function Navbar() {
   const { user, loading } = useAuthService();
@@ -10,11 +11,11 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6 lg:px-10 h-20 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5">
-          <div className="w-10 h-10 bg-rust rounded-xl flex items-center justify-center text-lg">
-            🐾
+        <div className="w-[36px] h-[36px] bg-rust rounded-[10px] flex items-center justify-center text-cream">
+            <PawPrint size={18} />
           </div>
-          <span className="font-display text-2xl font-bold text-bark-dark tracking-tight">
-            Stray<em className="italic text-rust font-normal">Adopt</em>
+          <span className="font-display text-[22px] font-semibold text-bark-dark tracking-tight">
+            Stray<em className="italic text-rust">Adopt</em>
           </span>
         </Link>
 

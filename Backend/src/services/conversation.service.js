@@ -35,17 +35,26 @@ async function getUserConversation(userId){
 
 
 async function getConversationMessages(conversationId , userId){
+    await getConversationForParticipant(conversationId, userId);
 
-    const conversation  = await conversationModel.findById(conversationId);
+    const messages = await messageModel.find({conversation : conversationId})
+    .sort({ createdAt: 1 })
+    .populate("sender", "username");
 
-    if(!conversation){
+    return messages;
+}
+
+async function getConversationForParticipant(conversationId, userId) {
+    const conversation = await conversationModel.findById(conversationId);
+
+    if (!conversation) {
         const error = new Error("Conversation not found");
-        error.statusCode = 404 ;
-        throw  error; 
+        error.statusCode = 404;
+        throw error;
     }
 
     const isParticipant = conversation.participants.some(
-        (p) => p.toString() === userId.toString()
+        (participant) => participant.toString() === userId.toString()
     );
 
     if (!isParticipant) {
@@ -54,11 +63,7 @@ async function getConversationMessages(conversationId , userId){
         throw error;
     }
 
-    const messages = await messageModel.find({conversation : conversationId})
-    .sort({ createdAt: 1 }) 
-    .populate("sender", "username");
-
-    return messages;
+    return conversation;
 }
 
 
@@ -99,6 +104,7 @@ async function sendMessage(conversationId, senderId, text) {
 module.exports = {
     findOrCreateConversation,
     getUserConversation,
+    getConversationForParticipant,
     getConversationMessages,
     sendMessage,
 };

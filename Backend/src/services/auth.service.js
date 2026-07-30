@@ -22,7 +22,7 @@ async function registerUser({ username, email, password }) {
 
     return {
         token,
-        user: { id: user._id, username: user.username, email: user.email },
+        user: { _id: user._id, username: user.username, email: user.email },
     };
 }
 
@@ -49,7 +49,7 @@ async function loginUser({ email, password }) {
 
     return {
         token,
-        user: { id: user._id, username: user.username, email: user.email },
+        user: { _id: user._id, username: user.username, email: user.email },
     };
 }
 
