@@ -10,8 +10,11 @@ async function findOrCreateConversation(userId , otherUserID){
     }
 
     let conversation = await conversationModel.findOne({
-        participants: { $all: [userId, otherUserID] },
-    });
+        participants: {
+          $all: [userId, otherUserID],
+          $size: 2,
+        },
+      });
 
     if (!conversation) {
         conversation = await conversationModel.create({

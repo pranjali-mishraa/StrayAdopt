@@ -2,7 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuthService } from "../../auth/hooks/useAuthService";
 import { useSocket } from "../SocketContext";
-import { getConversations,getMessages } from "../service/conversationService";
+import { getConversations,getMessages , startConversation } from "../service/conversationService";
+import { useSearchParams } from "react-router-dom";
 
 function displayName(conversation, currentUserId) {
   return conversation.participants?.find((participant) => participant._id !== currentUserId)?.username || "Conversation";
@@ -20,6 +21,10 @@ export default function ChatPage() {
   const [loadingMessages, setLoadingMessages] = useState(Boolean(conversationId));
   const [error, setError] = useState("");
   const endOfMessagesRef = useRef(null);
+
+  const [searchParams] = useSearchParams();
+  const otherUserId = searchParams.get("with");
+  
 
   const activeConversation = useMemo(
     () => conversations.find((conversation) => conversation._id === conversationId),
@@ -41,6 +46,28 @@ export default function ChatPage() {
   useEffect(() => {
     Promise.resolve().then(loadConversations);
   }, [loadConversations]);
+
+  useEffect(() => {
+    // If we are already inside a conversation, or no owner was passed, do nothing.
+    if (conversationId || !otherUserId) return;
+  
+    async function openConversation() {
+      try {
+        const data = await startConversation(otherUserId);
+  
+        // Navigate to the conversation returned by the backend
+        navigate(`/chat/${data.conversation._id}`, {
+          replace: true,
+        });
+      } catch (err) {
+        setError(
+          err.response?.data?.message || "Could not start conversation."
+        );
+      }
+    }
+  
+    openConversation();
+  }, [conversationId, otherUserId, navigate]);
 
   useEffect(() => {
     if (!conversationId) {
@@ -102,6 +129,7 @@ export default function ChatPage() {
     });
   };
 
+  
   return (
     <main className="bg-cream min-h-[calc(100vh-5rem)] p-4 sm:p-6">
       <section className="max-w-6xl h-[calc(100vh-8rem)] min-h-[520px] mx-auto bg-white border border-border-brand rounded-2xl shadow-sm overflow-hidden grid md:grid-cols-[19rem_1fr]">
