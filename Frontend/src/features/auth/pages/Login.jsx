@@ -83,6 +83,12 @@ export default function Login() {
           <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">{serverError}</p>
         )}
 
+        <div className="text-right -mt-1">
+          <Link to="/forgot-password" className="text-[13px] text-rust hover:opacity-75 transition-opacity">
+            Forgot password?
+          </Link>
+        </div>
+
         <button
           type="submit"
           disabled={loading}

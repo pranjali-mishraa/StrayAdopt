@@ -11,6 +11,9 @@ import PostDetails from "./features/postDetails/PostDetails";
 import EditPost from "./features/createPost/editPosts";
 import ChatPage from "./features/chat/pages/ChatPage";
 import About from "./features/about/About";
+import VerifyOtp from "./features/auth/pages/VerifyOtp";
+import ForgotPassword from "./features/auth/pages/ForgotPassword";
+import ResetPassword from "./features/auth/pages/ResetPassword";
 export const router = createBrowserRouter([
     {
         element: <Layout/>,
@@ -61,5 +64,14 @@ export const router = createBrowserRouter([
     {
         path : "/register",
         element : <Register/>
-    }
+    },
+    { path: "/verify-otp",
+       element: <VerifyOtp />
+     },
+    { path: "/forgot-password",
+       element: <ForgotPassword />
+       },
+    { path: "/reset-password", 
+      element: <ResetPassword />
+     },
 ])

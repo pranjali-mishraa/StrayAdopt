@@ -37,7 +37,7 @@ export default function Register() {
 
     try {
       await handleRegister({ username: form.username, email: form.email, password: form.password });
-      navigate("/");
+      navigate("/verify-otp", { state: { mode: "register", email: form.email } });
     } catch (err) {
       setServerError(err?.response?.data?.message || "Something went wrong. Please try again.");
     }

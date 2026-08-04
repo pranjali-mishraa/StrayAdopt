@@ -46,7 +46,7 @@ async function verifyOtp(email, submittedOtp, purpose) {
         throw error;
     }
 
-    await record.deleteOne(); // one-time use — can't be replayed
+    await record.deleteOne(); 
     return true;
 }
 

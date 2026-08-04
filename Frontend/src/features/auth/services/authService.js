@@ -24,4 +24,29 @@ export async function getMe() {
   return response.data;
 }
 
+export async function verifyRegistrationOtp({ email, otp }) {
+  const response = await api.post("/api/auth/verify-registration-otp", { email, otp });
+  return response.data;
+}
+
+export async function resendRegistrationOtp({ email }) {
+  const response = await api.post("/api/auth/resend-registration-otp", { email });
+  return response.data;
+}
+
+export async function requestPasswordResetOtp({ email }) {
+  const response = await api.post("/api/auth/forgot-password/request-otp", { email });
+  return response.data;
+}
+
+export async function verifyPasswordResetOtp({ email, otp }) {
+  const response = await api.post("/api/auth/forgot-password/verify-otp", { email, otp });
+  return response.data;
+}
+
+export async function resetPassword({ resetToken, newPassword }) {
+  const response = await api.post("/api/auth/forgot-password/reset", { resetToken, newPassword });
+  return response.data;
+}
+
 export default api ; 
