@@ -1,7 +1,13 @@
 const conversationModel = require("../models/conversation.model");
 const messageModel = require("../models/message.model");
 
-async function findOrCreateConversation(userId , otherUserID){
+async function findOrCreateConversation(userId, otherUserID) {
+
+    console.log("findOrCreateConversation called", {
+        userId: userId.toString(),
+        otherUserID: otherUserID.toString(),
+        time: Date.now(),
+    });
 
     if (userId.toString() === otherUserID.toString()) {
         const error = new Error("You cannot start a conversation with yourself");
@@ -9,22 +15,37 @@ async function findOrCreateConversation(userId , otherUserID){
         throw error;
     }
 
-    let conversation = await conversationModel.findOne({
-        participants: {
-          $all: [userId, otherUserID],
-          $size: 2,
-        },
-      });
+    const sortedParticipants = [userId.toString(), otherUserID.toString()].sort();
 
-    if (!conversation) {
-        conversation = await conversationModel.create({
-            participants: [userId, otherUserID],
-        });
+let conversation = await conversationModel.findOne({
+    participants: sortedParticipants,
+});
+
+    if (conversation) {
+        return conversation;
     }
 
-    return conversation;
+    try {
+        conversation = await conversationModel.create({
+            participants: sortedParticipants,
+        });
+        return conversation;
+    } catch (error) {
 
+        console.log("ERROR:", error);
+        console.log("CODE:", error.code);
+        console.log("MESSAGE:", error.message);
+        if (error.code === 11000) {
+            conversation = await conversationModel.findOne({
+                participants: sortedParticipants,
+            });
+            return conversation;
+        }
+        throw error;
+    }
 }
+
+
 
 async function getUserConversation(userId){
     const conversations = await conversationModel
