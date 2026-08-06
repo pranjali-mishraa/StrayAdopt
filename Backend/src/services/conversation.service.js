@@ -3,11 +3,7 @@ const messageModel = require("../models/message.model");
 
 async function findOrCreateConversation(userId, otherUserID) {
 
-    console.log("findOrCreateConversation called", {
-        userId: userId.toString(),
-        otherUserID: otherUserID.toString(),
-        time: Date.now(),
-    });
+
 
     if (userId.toString() === otherUserID.toString()) {
         const error = new Error("You cannot start a conversation with yourself");

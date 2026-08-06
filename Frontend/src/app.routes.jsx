@@ -14,6 +14,8 @@ import About from "./features/about/About";
 import VerifyOtp from "./features/auth/pages/VerifyOtp";
 import ForgotPassword from "./features/auth/pages/ForgotPassword";
 import ResetPassword from "./features/auth/pages/ResetPassword";
+import Explore from "./features/Pages/ExploreAllPetsPage";
+
 export const router = createBrowserRouter([
     {
         element: <Layout/>,
@@ -74,4 +76,6 @@ export const router = createBrowserRouter([
     { path: "/reset-password", 
       element: <ResetPassword />
      },
+     { path: "/pets", 
+      element: <Explore /> }
 ])
