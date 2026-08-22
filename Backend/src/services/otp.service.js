@@ -8,9 +8,9 @@ function generateSixDigitOtp() {
     return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-// Invalidates any previous OTPs for this email+purpose, generates a fresh one, hashes it, stores it, emails it.
+
 async function createAndSendOtp(email, purpose) {
-    await otpModel.deleteMany({ email, purpose }); // invalidate previous OTPs
+    await otpModel.deleteMany({ email, purpose }); 
 
     const otp = generateSixDigitOtp();
     const otpHash = await bcrypt.hash(otp, 10);
