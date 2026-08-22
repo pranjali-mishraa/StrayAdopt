@@ -6,11 +6,11 @@ FROM node:20-alpine AS frontend-builder
 
 WORKDIR /app
 
-COPY frontend/package*.json ./
+COPY Frontend/package*.json ./
 
 RUN npm install
 
-COPY frontend/ .
+COPY Frontend/ .
 
 RUN npm run build
 
@@ -23,12 +23,14 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-COPY backend/package*.json ./
+COPY Backend/package*.json ./
 
 RUN npm install --omit=dev
 
-COPY backend/ .
+COPY Backend/ .
 
 COPY --from=frontend-builder /app/dist ./public
+
+EXPOSE 8000
 
 CMD ["node", "server.js"]
