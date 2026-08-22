@@ -12,6 +12,10 @@ RUN npm install
 
 COPY Frontend/ .
 
+# Get VITE_API_URL from Render
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+
 RUN npm run build
 
 
@@ -30,7 +34,5 @@ RUN npm install --omit=dev
 COPY Backend/ .
 
 COPY --from=frontend-builder /app/dist ./public
-
-EXPOSE 8000
 
 CMD ["node", "server.js"]
