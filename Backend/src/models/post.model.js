@@ -1,10 +1,16 @@
 const mongoose = require("mongoose");
 
 const postSchema = new mongoose.Schema({
-    postBy:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"User",
-        required:true,
+    postBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        refPath: "postByModel",
+        required: true,
+    },
+    postByModel: {
+        type: String,
+        enum: ["User", "Ngo"],
+        default: "User",
+        required: true,
     },
     images : {
         type:[String],
