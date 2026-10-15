@@ -8,103 +8,50 @@ async function main() {
         // ==============================
         // CONNECT TO MONGODB
         // ==============================
-
         await mongoose.connect(process.env.MONGO_URI);
-
         console.log("MongoDB connected");
 
-        // ==============================
-        // TEST QUERY
-        // ==============================
+        const testSessionId = `test_session_${Date.now()}`;
+        console.log(`Using Session ID: ${testSessionId}\n`);
 
-        const query =
+        // ==========================================
+        // TURN 1: INITIAL QUERY
+        // ==========================================
+        const query1 =
             "I found a one month old puppy at ABES College. How should I take care of it?";
 
-        console.log("\n========== QUERY ==========\n");
-        console.log(query);
+        console.log("==========================================");
+        console.log("TURN 1 - USER QUERY:");
+        console.log(query1);
+        console.log("==========================================");
 
-        console.log("\n========== RUNNING RAG ==========\n");
+        const result1 = await answerUserQuery(query1, testSessionId);
 
-        // ==============================
-        // RUN RAG
-        // ==============================
+        console.log("\n--- Turn 1 AI Answer ---");
+        console.log(result1.answer);
 
-        const result = await answerUserQuery(query);
+        // ==========================================
+        // TURN 2: FOLLOW-UP QUERY (Requires Context)
+        // ==========================================
+        const query2 = "What about vaccination for him? When should I start?";
 
-        // ==============================
-        // ANSWER
-        // ==============================
+        console.log("\n==========================================");
+        console.log("TURN 2 - FOLLOW-UP QUERY (using pronouns 'him'):");
+        console.log(query2);
+        console.log("==========================================");
 
-        console.log("\n========== ANSWER ==========\n");
-        console.log(result.answer);
+        const result2 = await answerUserQuery(query2, testSessionId);
 
-        // ==============================
-        // POST SOURCES
-        // ==============================
+        console.log("\n--- Standalone Query Reformulated by Contextualizer ---");
+        console.log(result2.standaloneQuery);
 
-        console.log("\n========== POST SOURCES ==========\n");
-
-        result.sources.posts.forEach((post, index) => {
-
-            console.log(`\n--- Post ${index + 1} ---`);
-
-            console.log("ID:", post._id);
-            console.log("Description:", post.description);
-            console.log("Location:", post.location);
-            console.log("Status:", post.status);
-            console.log("Images:", post.images);
-
-            console.log("\nPosted By:");
-
-            console.log(
-                "  ID:",
-                post.postBy?._id
-            );
-
-            console.log(
-                "  Username:",
-                post.postBy?.username
-            );
-        });
-
-        // ==============================
-        // KNOWLEDGE SOURCES
-        // ==============================
-
-        console.log("\n========== KNOWLEDGE SOURCES ==========\n");
-
-        result.sources.knowledge.forEach((source, index) => {
-
-            console.log(`\n--- Knowledge ${index + 1} ---`);
-
-            console.log("Source:", source.source);
-            console.log("Page:", source.pageNumber);
-        });
-
-        // ==============================
-        // WEB SOURCES
-        // ==============================
-
-        console.log("\n========== WEB SOURCES ==========\n");
-
-        result.sources.web.forEach((source, index) => {
-
-            console.log(`\n--- Web ${index + 1} ---`);
-
-            console.log("Title:", source.title);
-            console.log("URL:", source.url);
-            console.log("Score:", source.score);
-        });
+        console.log("\n--- Turn 2 AI Answer (Maintaining Context) ---");
+        console.log(result2.answer);
 
     } catch (error) {
-
-        console.error("\nRAG test failed:");
-        console.error(error);
-
+        console.error("\nRAG test failed:", error);
     } finally {
-
         await mongoose.disconnect();
-
         console.log("\nMongoDB disconnected");
     }
 }

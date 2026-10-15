@@ -7,7 +7,17 @@ const api = axios.create({
   withCredentials: true,
 });
 
-export async function ragSearch(query) {
-  const response = await api.post("/api/rag-search", { query });
+export async function ragSearch(query, sessionId) {
+  const response = await api.post("/api/rag-search", { query, sessionId });
+  return response.data;
+}
+
+export async function getRagHistory(sessionId) {
+  const response = await api.get(`/api/rag-search/history/${sessionId}`);
+  return response.data;
+}
+
+export async function clearRagHistory(sessionId) {
+  const response = await api.delete(`/api/rag-search/history/${sessionId}`);
   return response.data;
 }

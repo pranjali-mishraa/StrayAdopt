@@ -1,3 +1,4 @@
+
 const mongoose = require("mongoose");
 
 const ngoHighlightSchema = new mongoose.Schema(
@@ -25,6 +26,7 @@ const ngoHighlightSchema = new mongoose.Schema(
             type: String,
             enum: ["highlight", "story"],
             default: "highlight",
+            required: true,
         },
 
         mediaType: {
@@ -32,18 +34,18 @@ const ngoHighlightSchema = new mongoose.Schema(
             enum: ["image", "video"],
             required: true,
         },
-        // Stories must have an expiry; permanent highlights must not.
-        // Not enforced by MongoDB: filter on this at query time.
+
         expiresAt: {
             type: Date,
             default: null,
             validate: {
                 validator: function (value) {
                     return this.contentType === "story"
-                        ? value instanceof Date
+                        ? value instanceof Date && !Number.isNaN(value.getTime())
                         : value == null;
                 },
-                message: "Stories require expiresAt; highlights must not have one.",
+                message:
+                    "Stories require an expiry date; highlights must not have one.",
             },
         },
     },

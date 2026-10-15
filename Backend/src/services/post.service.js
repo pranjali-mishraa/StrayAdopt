@@ -1,25 +1,13 @@
 const cloudinary = require("../config/cloudinary");
 const postModel = require("../models/post.model");
 const { generateEmbedding } = require("./embedding.service");
+const { uploadToCloudinary } = require("./upload.service");
 
-
-function uploadImageToCloudinary(fileBuffer){
-    return new Promise ((resolve, reject)=>{
-        const stream = cloudinary.uploader.upload_stream(
-            {folder : "strayAdopt/posts"},
-            
-            (error , result)=>{
-                if(error){
-                    return reject(error);
-                }else{
-                    resolve(result.secure_url);
-                }
-            }
-        )
-
-        stream.end(fileBuffer);
-    })
+async function uploadImageToCloudinary(fileBuffer) {
+    const result = await uploadToCloudinary(fileBuffer, "strayAdopt/posts");
+    return result.secure_url;
 }
+
 
 async function createPost({postBy , description , location , files}){
     if(!files || files.length === 0 ){

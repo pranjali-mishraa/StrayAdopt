@@ -6,6 +6,7 @@ const express = require('express');
 
 const app = require('./app');
 const connectDB = require('./src/config/database');
+const { initRedis } = require('./src/config/redis');
 const { initSocket } = require('./src/socket');
 
 const PORT = process.env.PORT || 5000;
@@ -21,6 +22,7 @@ app.get('/{*splat}', (req, res) => {
 });
 
 connectDB().then(() => {
+    initRedis();
     initSocket(server);
 
     server.listen(PORT, () => {

@@ -1,69 +1,102 @@
+
 const mongoose = require("mongoose");
 
 const ngoSchema = new mongoose.Schema(
     {
-        userId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-            required: true,
-            unique: true, // one NGO profile per account
-        },
         name: {
             type: String,
             required: true,
             trim: true,
         },
+
+        email: {
+            type: String,
+            required: true,
+            unique: true,
+            lowercase: true,
+            trim: true,
+        },
+
+        password: {
+            type: String,
+            required: true,
+            select: false,
+        },
+
+        isEmailVerified: {
+            type: Boolean,
+            default: false,
+        },
+
         description: {
             type: String,
             required: true,
             trim: true,
         },
+
         image: {
-            type: String, // Cloudinary URL of the NGO photo/logo
+            type: String,
             required: true,
+            trim: true,
         },
+
         address: {
             type: String,
             trim: true,
         },
+
         location: {
             type: {
                 type: String,
                 enum: ["Point"],
                 default: "Point",
+                required: true,
             },
             coordinates: {
-                type: [Number], // [longitude, latitude]
+                type: [Number],
                 required: true,
                 validate: {
-                    validator: (c) =>
-                        Array.isArray(c) &&
-                        c.length === 2 &&
-                        c[0] >= -180 && c[0] <= 180 &&
-                        c[1] >= -90 && c[1] <= 90,
-                    message: "Coordinates must be [longitude, latitude] within valid ranges.",
+                    validator: (coordinates) =>
+                        Array.isArray(coordinates) &&
+                        coordinates.length === 2 &&
+                        coordinates[0] >= -180 &&
+                        coordinates[0] <= 180 &&
+                        coordinates[1] >= -90 &&
+                        coordinates[1] <= 90,
+                    message:
+                        "Coordinates must be [longitude, latitude] within valid ranges.",
                 },
             },
         },
+
         contact: {
             phone: { type: String, trim: true },
-            email: { type: String, trim: true, lowercase: true },
             website: { type: String, trim: true },
         },
+
+        verificationDocuments: [
+            {
+                label: { type: String, trim: true },
+                url: { type: String, required: true },
+            },
+        ],
+
         verificationStatus: {
             type: String,
             enum: ["pending", "verified", "rejected"],
             default: "pending",
         },
-        verificationDocuments: [
-            {
-                label: { type: String, trim: true }, // e.g. "Registration certificate"
-                url: { type: String, required: true }, // Cloudinary URL, never raw files
-            },
-        ],
-        // Reserved for the future admin-verification step
-        verifiedAt: { type: Date },
-        rejectionReason: { type: String, trim: true },
+
+        verifiedAt: {
+            type: Date,
+            default: null,
+        },
+
+        rejectionReason: {
+            type: String,
+            trim: true,
+            default: null,
+        },
     },
     { timestamps: true }
 );
