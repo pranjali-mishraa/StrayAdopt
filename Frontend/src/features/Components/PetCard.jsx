@@ -1,16 +1,18 @@
+
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthService } from "../auth/hooks/useAuthService";
+import { getPostOwner } from "../utils/getPostOwner";
 
-export default function PetCard({ post, actions  }) {
+export default function PetCard({ post, actions }) {
   const [activeImage, setActiveImage] = useState(0);
   const navigate = useNavigate();
   const { user } = useAuthService();
 
-  const isOwner = user?._id === post?.postBy?._id;
-
-
   if (!post) return null;
+
+  const owner = getPostOwner(post);
+  const isOwner = user?._id === post?.postBy?._id;
 
   const images = post.images || [];
   const hasMultipleImages = images.length > 1;
@@ -26,11 +28,13 @@ export default function PetCard({ post, actions  }) {
     >
       {/* Image */}
       <div className="relative h-64 overflow-hidden">
-        <img
-          src={images[activeImage]}
-          alt={post.description}
-          className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-        />
+        {images.length > 0 && (
+          <img
+            src={images[activeImage]}
+            alt={post.description}
+            className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+          />
+        )}
 
         <div className="absolute top-4 left-4 flex items-center gap-2 bg-sage-light px-4 py-1.5 rounded-full shadow-sm">
           <span className="w-2 h-2 rounded-full bg-sage animate-pulse" />
@@ -44,12 +48,15 @@ export default function PetCard({ post, actions  }) {
             {images.map((_, i) => (
               <button
                 key={i}
+                type="button"
                 onClick={(e) => {
-                  e.stopPropagation(); // don't trigger card navigation
+                  e.stopPropagation();
                   setActiveImage(i);
                 }}
                 className={`h-1.5 rounded-full transition-all duration-300 ${
-                  i === activeImage ? "w-5 bg-white" : "w-1.5 bg-white/50 hover:bg-white/80"
+                  i === activeImage
+                    ? "w-5 bg-white"
+                    : "w-1.5 bg-white/50 hover:bg-white/80"
                 }`}
                 aria-label={`Show image ${i + 1}`}
               />
@@ -68,9 +75,19 @@ export default function PetCard({ post, actions  }) {
 
         <div className="border-t border-border-brand mb-4" />
 
+        {/* Location */}
         <div className="flex items-center gap-2 mb-2.5 text-text-mid text-[15px]">
           <span className="w-7 h-7 rounded-full bg-rust/10 flex items-center justify-center flex-shrink-0">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0572A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#C0572A"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
               <circle cx="12" cy="10" r="3" />
             </svg>
@@ -78,33 +95,60 @@ export default function PetCard({ post, actions  }) {
           {post.location}
         </div>
 
+        {/* Posted By */}
         <div className="flex items-center gap-2 mb-5 text-text-mid text-[15px]">
           <span className="w-7 h-7 rounded-full bg-rust/10 flex items-center justify-center flex-shrink-0">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0572A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#C0572A"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <circle cx="12" cy="8" r="4" />
               <path d="M4 20c0-4 3.5-7 8-7s8 3 8 7" />
             </svg>
           </span>
-          Posted by <span className="font-semibold text-bark-dark">{post.postBy?.username}</span>
+
+          Posted by{" "}
+          <span className="font-semibold text-bark-dark">
+            {owner.name}
+          </span>
+
+          {owner.isNgo && (
+            <span className="ml-1.5 text-[11px] uppercase tracking-wide bg-sage-light text-bark-dark px-2 py-0.5 rounded-full">
+              NGO
+            </span>
+          )}
         </div>
 
-        
-
+        {/* Owner / NGO Action */}
         {!isOwner && (
           <Link
-            to={`/chats?with=${post.postBy?._id}&post=${post._id}`}
+            to={
+              owner.isNgo
+                ? `/ngos/${owner.id}`
+                : `/chat?with=${owner.id}&post=${post._id}`
+            }
             onClick={(e) => e.stopPropagation()}
             className="mt-auto inline-flex items-center justify-center gap-2 bg-rust hover:bg-rust-hover text-white font-medium py-3.5 rounded-xl transition-all duration-300 active:scale-95"
           >
-           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-          </svg>
-          Message Owner
+            {owner.isNgo ? "View NGO" : "Message Owner"}
           </Link>
         )}
 
-
-        {actions && <div className="mt-3" onClick={(e) => e.stopPropagation()}>{actions}</div>}
+        {/* Custom Actions */}
+        {actions && (
+          <div
+            className="mt-3"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {actions}
+          </div>
+        )}
       </div>
     </div>
   );
