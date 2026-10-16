@@ -191,6 +191,14 @@ async function deletePost (postId , userId){
 
 }
 
+async function getPostsByOwner(ownerId, { page = 1, limit = 12 }) {
+    const filter = { postBy: ownerId };
+    const [posts, total] = await Promise.all([
+        postModel.find(filter).sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit).populate(OWNER_POPULATE),
+        postModel.countDocuments(filter),
+    ]);
+    return { posts, total, page, totalPages: Math.ceil(total / limit) };
+}
 
 module.exports = { createPost,
      getLatestPosts,
@@ -201,7 +209,8 @@ module.exports = { createPost,
     updateImages,
     updateLocation,
     toggleAdoptedStatus,
-    deletePost
+    deletePost,
+    getPostsByOwner
     };
 
 

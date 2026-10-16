@@ -19,6 +19,7 @@ const postRouter = require('./src/routes/post.routes');
 const conversationRouter = require('./src/routes/conversation.routes')
 
 const ragSearchRouter = require("./src/routes/ragSearch.routes");
+const ngoRouter = require("./src/routes/ngo.routes");
 
 /* use all routes here */
 
@@ -27,4 +28,5 @@ const ragSearchRouter = require("./src/routes/ragSearch.routes");
   app.use('/api/conversations',conversationRouter)
   
   app.use("/api", ragSearchRouter);
+  app.use("/api/ngo", ngoRouter);
 module.exports = app ;
