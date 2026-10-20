@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import PetCard from "../../../components/PetCard"; // adjust path
+import PetCard from "../../Components/PetCard"
 import { useNgoAuth } from "../hooks/useNgoAuth";
 import { createHighlight, getMyNgoPosts } from "../services/ngoService";
 

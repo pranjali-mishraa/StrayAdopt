@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import PetCard from "../../../components/PetCard"; // adjust path
+import PetCard from "../../Components/PetCard"; 
 import { getNgoHighlights, getNgoPosts, getNgoProfile } from "../services/ngoService";
 
 function MediaTile({ item }) {
