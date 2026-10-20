@@ -103,6 +103,25 @@ export default function Login() {
             Sign Up free
           </Link>
         </p>
+
+
+<p className="text-center text-[14px] text-text-light mt-2">
+  Are you an NGO?{" "}
+  <Link
+    to="/ngo/register"
+    className="text-rust font-medium hover:opacity-75 transition-opacity"
+  >
+    Register as an NGO
+  </Link>
+  {" · "}
+  <Link
+    to="/ngo/login"
+    className="text-rust font-medium hover:opacity-75 transition-opacity"
+  >
+    NGO login
+  </Link>
+</p>
+
       </form>
     </AuthShell>
   );

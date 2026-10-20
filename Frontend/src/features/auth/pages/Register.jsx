@@ -133,6 +133,17 @@ export default function Register() {
             Login
           </Link>
         </p>
+
+<p className="text-center text-[14px] text-text-light">
+  Running an NGO?{" "}
+  <Link
+    to="/ngo/register"
+    className="text-rust font-medium hover:opacity-75 transition-opacity"
+  >
+    Register as an NGO
+  </Link>
+</p>
+
       </form>
     </AuthShell>
   );
