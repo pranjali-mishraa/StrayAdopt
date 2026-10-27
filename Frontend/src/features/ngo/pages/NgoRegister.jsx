@@ -3,6 +3,10 @@ import { Link } from "react-router-dom";
 import Field from "../../auth/components/FormField";
 import { registerNgo } from "../services/ngoService";
 
+
+
+
+
 export default function NgoRegister() {
   const [form, setForm] = useState({
     name: "", description: "", email: "", password: "",
