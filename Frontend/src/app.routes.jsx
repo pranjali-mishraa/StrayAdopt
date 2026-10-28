@@ -21,6 +21,12 @@ import NgoRegister from "./features/ngo/pages/NgoRegister";
 import NgoLogin from "./features/ngo/pages/NgoLogin";
 import NgoDashboard from "./features/ngo/pages/NgoDashboard";
 import NgoProfile from "./features/ngo/pages/NgoProfile";
+import AdminLayout from "./features/admin/components/AdminLayout";
+import ProtectedAdmin from "./features/admin/components/ProtectedAdmin";
+import AdminLogin from "./features/admin/pages/AdminLogin";
+import AdminDashboard from "./features/admin/pages/AdminDashboard";
+import AdminNgoReview from "./features/admin/pages/AdminNgoReview";
+
 
 export const router = createBrowserRouter([
   {
@@ -62,4 +68,13 @@ export const router = createBrowserRouter([
   { path: "/verify-otp", element: <VerifyOtp /> },
   { path: "/forgot-password", element: <ForgotPassword /> },
   { path: "/reset-password", element: <ResetPassword /> },
+  {
+    path: "/admin",
+    element: <AdminLayout />,
+    children: [
+      { path: "login", element: <AdminLogin /> },
+      { index: true, element: <ProtectedAdmin><AdminDashboard /></ProtectedAdmin> },
+      { path: "ngos/:id", element: <ProtectedAdmin><AdminNgoReview /></ProtectedAdmin> },
+    ],
+  },
 ]);
