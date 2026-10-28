@@ -5,7 +5,9 @@ const BASE_URL = import.meta.env.PROD
   : "http://localhost:8000";
 
 const api = axios.create({
-  baseURL: BASE_URL,
+  baseURL: import.meta.env.PROD
+    ? "https://strayadopt.onrender.com"
+    : "http://localhost:8000",
   withCredentials: true,
 });
 

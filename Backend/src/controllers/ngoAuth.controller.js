@@ -1,4 +1,4 @@
-const ngoAuthService = require("../services/ngo.service");
+const ngoAuthService = require("../services/ngoAuth.service");
 const { uploadToCloudinary } = require("../services/upload.service");
 
 const cookieOptions = {
