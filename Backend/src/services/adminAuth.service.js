@@ -1,8 +1,9 @@
 
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const adminModel = require("../models/admin.model");
-const blacklistTokenModel = require("../models/blacklistToken.model");
+const mongoose = require("mongoose");
+const cloudinary = require("../config/cloudinary");
+const ngoModel = require("../models/ngo.model");
+
+const STATUSES = ["pending", "verified", "rejected"];
 
 function httpError(message, statusCode) {
     const error = new Error(message);
@@ -10,84 +11,115 @@ function httpError(message, statusCode) {
     return error;
 }
 
-function formatAdmin(admin) {
-    return {
-        _id: admin._id,
-        name: admin.name,
-        email: admin.email,
-    };
+async function listNgos(status = "pending") {
+    if (!STATUSES.includes(status)) {
+        throw httpError("Invalid status", 400);
+    }
+
+    return ngoModel
+        .find({ verificationStatus: status })
+        .sort({ createdAt: -1 });
 }
 
-async function loginAdmin({ email, password }) {
-    if (
-        typeof email !== "string" ||
-        !email.trim() ||
-        typeof password !== "string" ||
-        !password
-    ) {
-        throw httpError("Email and password are required", 400);
+async function getNgoForReview(id) {
+    if (!mongoose.isValidObjectId(id)) {
+        throw httpError("NGO not found", 404);
     }
 
-    if (!process.env.JWT_SECRET) {
-        throw new Error("JWT_SECRET is not configured");
+    const ngo = await ngoModel.findById(id);
+
+    if (!ngo) {
+        throw httpError("NGO not found", 404);
     }
 
-    const admin = await adminModel
-        .findOne({ email: email.trim().toLowerCase() })
-        .select("+password");
-
-    if (!admin || !(await bcrypt.compare(password, admin.password))) {
-        throw httpError("Invalid email or password", 401);
-    }
-
-    const token = jwt.sign(
-        {
-            id: admin._id.toString(),
-            email: admin.email,
-            role: "admin",
-        },
-        process.env.JWT_SECRET,
-        { expiresIn: "1d" }
-    );
-
-    return {
-        token,
-        admin: formatAdmin(admin),
-    };
+    return ngo;
 }
 
-async function logoutAdmin(token) {
-    if (!token) {
-        throw httpError("Token not provided", 400);
-    }
+// Add secure view and download URLs for verification documents.
+async function getNgoDetails(id) {
+    const ngo = (await getNgoForReview(id)).toObject();
 
-    if (!process.env.JWT_SECRET) {
-        throw new Error("JWT_SECRET is not configured");
-    }
+    ngo.verificationDocuments = (ngo.verificationDocuments || []).map((doc) => {
+        if (!doc.publicId) {
+            return {
+                ...doc,
+                viewUrl: doc.url,
+                downloadUrl: doc.url?.replace(
+                    "/upload/",
+                    "/upload/fl_attachment/"
+                ),
+            };
+        }
 
-    let decoded;
+        const resource_type = doc.resourceType || "image";
 
-    try {
-        decoded = jwt.verify(token, process.env.JWT_SECRET);
-    } catch {
-        throw httpError("Invalid or expired admin token", 401);
-    }
+        return {
+            ...doc,
+            viewUrl: cloudinary.url(doc.publicId, {
+                type: "authenticated",
+                resource_type,
+                sign_url: true,
+                secure: true,
+                format: doc.format,
+            }),
+            downloadUrl: cloudinary.utils.private_download_url(
+                doc.publicId,
+                doc.format,
+                {
+                    type: "authenticated",
+                    resource_type,
+                    attachment: true,
+                    expires_at: Math.floor(Date.now() / 1000) + 10 * 60,
+                }
+            ),
+        };
+    });
 
-    if (decoded.role !== "admin" || !decoded.exp || !decoded.id) {
-        throw httpError("Invalid admin token", 401);
-    }
-
-    const existingToken = await blacklistTokenModel.findOne({ token });
-
-    if (!existingToken) {
-        await blacklistTokenModel.create({
-            token,
-            expiresAt: new Date(decoded.exp * 1000),
-        });
-    }
-
-    return true;
+    return ngo;
 }
 
-module.exports = { loginAdmin, logoutAdmin };
+async function approveNgo(id) {
+    const ngo = await getNgoForReview(id);
 
+    if (!["pending", "rejected"].includes(ngo.verificationStatus)) {
+        throw httpError(
+            "Only pending or rejected NGOs can be approved",
+            400
+        );
+    }
+
+    ngo.verificationStatus = "verified";
+    ngo.verifiedAt = new Date();
+    ngo.rejectionReason = null;
+
+    await ngo.save();
+
+    return ngo;
+}
+
+async function rejectNgo(id, reason) {
+    if (!reason?.trim()) {
+        throw httpError("A rejection reason is required", 400);
+    }
+
+    const ngo = await getNgoForReview(id);
+
+    if (ngo.verificationStatus !== "pending") {
+        throw httpError("Only pending NGOs can be rejected", 400);
+    }
+
+    ngo.verificationStatus = "rejected";
+    ngo.rejectionReason = reason.trim();
+    ngo.verifiedAt = null;
+
+    await ngo.save();
+
+    return ngo;
+}
+
+module.exports = {
+    listNgos,
+    getNgoDetails,
+    approveNgo,
+    rejectNgo,
+};
