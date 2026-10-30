@@ -1,31 +1,43 @@
 const postService = require("../services/post.service")
 
-async function createPostController(req , res){
 
+async function createPostController(req, res) {
     try {
-        const {description , location} = req.body ;
+        const { description, location } = req.body;
 
-    if(!description || !location){
-        return res.status(400).json({
-            message: "Description and message both are required."
-        })
-    }
+        if (!description || !location) {
+            return res.status(400).json({
+                message: "Description and location are required.",
+            });
+        }
 
-    const post = await postService.createPost({
-        postBy : req.user._id,
-        description ,
-        location,
-        files :req.files,
-    })
+        // Support both regular users and NGOs.
+        const creator = req.ngo || req.user;
 
-    return res.status(200).json({message: " Post created successfully" , post})
+        if (!creator?._id) {
+            return res.status(401).json({
+                message: "Authenticated creator not found.",
+            });
+        }
+
+        const post = await postService.createPost({
+            postBy: creator._id,
+            description,
+            location,
+            files: req.files,
+        });
+
+        return res.status(201).json({
+            message: "Post created successfully",
+            post,
+        });
     } catch (error) {
         return res.status(error.statusCode || 500).json({
             message: error.message || "Something went wrong",
         });
     }
-
 }
+
 
 async function getLatestPostsController(req , res){
     try {

@@ -1,19 +1,22 @@
 const mongoose = require("mongoose")
-const { validate } = require("./user.model")
+
 
 const conversationSchema  = new mongoose.Schema({
 
-    participants:{
-        type : [mongoose.Schema.Types.ObjectId],
-        ref : "User",
-        required : true ,
-        validate : {
-            validator : function (arr){
-                return arr.length ===2;
+    participants: [
+        {
+            participantId: {
+                type: mongoose.Schema.Types.ObjectId,
+                required: true,
+                refPath: "participants.participantModel"
             },
-            message : " A conversation must have exactly 2 participants."
-        },
-    },
+            participantModel: {
+                type: String,
+                required: true,
+                enum: ["User", "Ngo"]
+            }
+        }
+    ],
 
     lastMessage : {
         type : String ,
