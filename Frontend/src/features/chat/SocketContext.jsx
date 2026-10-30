@@ -1,6 +1,15 @@
-import { createContext, useContext, useEffect, useRef } from "react";
+
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useRef
+} from "react";
+
 import { io } from "socket.io-client";
+
 import { AuthContext } from "../auth/AuthContext";
+import { NgoAuthContext } from "../ngo/context/NgoAuthContext";
 
 const SocketContext = createContext(null);
 
@@ -9,14 +18,23 @@ const SOCKET_URL =
 
 export function SocketProvider({ children }) {
   const { user } = useContext(AuthContext);
+  const { ngo } = useContext(NgoAuthContext);
+
   const socketRef = useRef(null);
 
   useEffect(() => {
-    if (!user) {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-        socketRef.current = null;
-      }
+    // Disconnect if no account is logged in
+    if (!user && !ngo) {
+      socketRef.current?.disconnect();
+      socketRef.current = null;
+      return;
+    }
+
+    // Do not allow simultaneous account sessions
+    if (user && ngo) {
+      socketRef.current?.disconnect();
+      socketRef.current = null;
+      console.error("Multiple account sessions detected");
       return;
     }
 
@@ -28,16 +46,24 @@ export function SocketProvider({ children }) {
 
     socketRef.current = socket;
 
-    return () => {
-      socket.off("connect");
-      socket.off("connect_error");
-      socket.off("disconnect");
-      socket.off("error_event");
+    socket.on("connect", () => {
+      console.log("Chat socket connected");
+    });
 
+    socket.on("connect_error", (error) => {
+      console.error("Socket connection failed:", error.message);
+    });
+
+    socket.on("disconnect", (reason) => {
+      console.log("Socket disconnected:", reason);
+    });
+
+    return () => {
       socket.disconnect();
       socketRef.current = null;
     };
-  }, [user]);
+
+  }, [user?._id, ngo?._id]);
 
   return (
     <SocketContext.Provider value={socketRef}>
