@@ -1,10 +1,13 @@
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
 
+const conversationSchema = new mongoose.Schema({
+    conversationKey: {
+        type: String,
+        required: true
+    },
 
-const conversationSchema  = new mongoose.Schema({
-
-    participants: [
-        {
+    participants: {
+        type: [{
             participantId: {
                 type: mongoose.Schema.Types.ObjectId,
                 required: true,
@@ -15,21 +18,30 @@ const conversationSchema  = new mongoose.Schema({
                 required: true,
                 enum: ["User", "Ngo"]
             }
+        }],
+        required: true,
+        validate: {
+            validator: (participants) => participants.length === 2,
+            message: "A conversation must have exactly 2 participants."
         }
-    ],
-
-    lastMessage : {
-        type : String ,
-        default : ""
     },
 
-    lastMessageAt :{
-        type : Date ,
-        default : Date.now
+    lastMessage: {
+        type: String,
+        default: ""
+    },
+
+    lastMessageAt: {
+        type: Date,
+        default: Date.now
     }
 
-},
-    {timestamps:true}
-)
+}, { timestamps: true });
 
-module.exports = mongoose.model("Conversation" , conversationSchema);
+// Prevent duplicate conversations
+conversationSchema.index(
+    { conversationKey: 1 },
+    { unique: true }
+);
+
+module.exports = mongoose.model("Conversation", conversationSchema);
