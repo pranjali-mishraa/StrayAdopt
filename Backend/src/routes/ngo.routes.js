@@ -21,7 +21,13 @@ ngoRouter.post("/highlights", protectNgo, requireVerifiedNgo, highlightUpload, n
 
 // Adoption posts: same controllers as users, different auth chain
 ngoRouter.post("/posts", ...ngoWrite, upload.array("images", 5), postController.createPostController);
-ngoRouter.get("/posts/mine", protectNgo, asNgo, postController.getMyPostsController);
+ngoRouter.get(
+    "/posts/mine",
+    protectNgo,
+    requireVerifiedNgo,
+    asNgo,
+    postController.getMyPostsController
+);
 ngoRouter.patch("/posts/:id/description", ...ngoWrite, postController.updateDescriptionController);
 ngoRouter.patch("/posts/:id/location", ...ngoWrite, postController.updateLocationController);
 ngoRouter.patch("/posts/:id/images", ...ngoWrite, upload.array("images", 5), postController.updateImagesController);

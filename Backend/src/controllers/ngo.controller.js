@@ -16,7 +16,11 @@ async function getNgoPostsController(req, res) {
         await ngoService.getVerifiedNgo(req.params.id); // 404 unless verified
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 12;
-        const result = await postService.getPostsByOwner(req.params.id, { page, limit });
+        const result = await postService.getPostsByOwner(
+            req.params.id,
+            "Ngo",
+            { page, limit }
+        );
         return res.status(200).json(result);
     } catch (error) { return fail(res, error); }
 }
