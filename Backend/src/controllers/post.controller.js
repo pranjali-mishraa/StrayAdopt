@@ -71,9 +71,10 @@ async function getMyPostsController(req, res) {
 
 async function getPostByIdController(req, res) {
     try {
-        const { id, model } = req.postOwner;
         const post = await postService.getPostById(req.params.id);
+
         return res.status(200).json({ post });
+
     } catch (error) {
         return res.status(error.statusCode || 500).json({
             message: error.message || "Something went wrong",

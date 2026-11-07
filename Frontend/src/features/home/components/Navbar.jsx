@@ -1,19 +1,40 @@
+
 import { Link, useNavigate } from "react-router-dom";
+import { useContext } from "react";
 import { useAuthService } from "../../auth/hooks/useAuthService";
+import { NgoAuthContext } from "../../ngo/context/NgoAuthContext";
 import { PawPrint } from "lucide-react";
 
 export default function Navbar() {
-  const { user, loading } = useAuthService();
+  const { user, loading: userLoading } = useAuthService();
+  const { ngo, loading: ngoLoading } = useContext(NgoAuthContext);
+
   const navigate = useNavigate();
+
+  const loading = userLoading || ngoLoading;
+  const currentAccount = user || ngo;
+  const isNgo = Boolean(ngo);
+
+  function handleProfileClick() {
+    if (isNgo) {
+      navigate("/ngo/dashboard");
+    } else if (user) {
+      navigate("/profile");
+    } else {
+      navigate("/login");
+    }
+  }
 
   return (
     <header className="bg-warm border-b border-border-brand sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6 lg:px-10 h-20 flex items-center justify-between">
+
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5">
-        <div className="w-[36px] h-[36px] bg-rust rounded-[10px] flex items-center justify-center text-cream">
+          <div className="w-[36px] h-[36px] bg-rust rounded-[10px] flex items-center justify-center text-cream">
             <PawPrint size={18} />
           </div>
+
           <span className="font-display text-[22px] font-semibold text-bark-dark tracking-tight">
             Stray<em className="italic text-rust">Adopt</em>
           </span>
@@ -21,47 +42,67 @@ export default function Navbar() {
 
         {/* Nav links */}
         <nav className="hidden md:flex items-center gap-10">
-          <Link
-            to="/"
-            className="text-[15px] font-medium text-text-mid hover:text-bark-dark transition-colors"
-          >
+          <Link to="/" className="text-[15px] font-medium text-text-mid hover:text-bark-dark transition-colors">
             Home
           </Link>
-          <Link
-            to="/about"
-            className="text-[15px] font-medium text-text-mid hover:text-bark-dark transition-colors"
-          >
+
+          <Link to="/about" className="text-[15px] font-medium text-text-mid hover:text-bark-dark transition-colors">
             About
           </Link>
         </nav>
 
         {/* Right side */}
         <div className="flex items-center gap-5">
+
           {!loading && user && (
-                  <>
-            <Link
-              to="/create-post"
-              className="text-[15px] font-medium text-text-mid hover:text-bark-dark transition-colors"
-            >
-              Create Post
-            </Link>
-            <Link
-              to="/chats"
-              className="text-[15px] font-medium text-text-mid hover:text-bark-dark transition-colors"
-            >
-              Chats
-            </Link>
+            <>
+              <Link
+                to="/create-post"
+                className="text-[15px] font-medium text-text-mid hover:text-bark-dark transition-colors"
+              >
+                Create Post
+              </Link>
+
+              <Link
+                to="/chats"
+                className="text-[15px] font-medium text-text-mid hover:text-bark-dark transition-colors"
+              >
+                Chats
+              </Link>
+            </>
+          )}
+
+          {!loading && ngo && (
+            <>
+              <Link
+                to="/ngo/dashboard"
+                className="text-[15px] font-medium text-text-mid hover:text-bark-dark transition-colors"
+              >
+                NGO Dashboard
+              </Link>
+
+              <Link
+                to="/chats"
+                className="text-[15px] font-medium text-text-mid hover:text-bark-dark transition-colors"
+              >
+                Chats
+              </Link>
             </>
           )}
 
           <button
-            onClick={() => navigate(user ? "/profile" : "/login")}
+            onClick={handleProfileClick}
+            disabled={loading}
             className="w-11 h-11 rounded-full border border-border-brand flex items-center justify-center text-text-mid hover:border-rust hover:text-rust transition-colors overflow-hidden"
             aria-label="Profile"
           >
-            {user ? (
+            {currentAccount ? (
               <span className="text-[15px] font-semibold text-bark-dark">
-                {user.username?.[0]?.toUpperCase()}
+                {(
+                  isNgo
+                    ? currentAccount.name
+                    : currentAccount.username
+                )?.[0]?.toUpperCase() || "A"}
               </span>
             ) : (
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -70,9 +111,8 @@ export default function Navbar() {
               </svg>
             )}
           </button>
+
         </div>
-
-
       </div>
     </header>
   );

@@ -35,7 +35,7 @@ postRouter.get('/allPosts', postController.getAllPostsController);
 postRouter.get('/getMyPosts', protect, asUser, postController.getMyPostsController);
 
 /**
- * @route GET /api/posts/:id
+ * @route GET /api/posts/:idf
  * @description get full details of the single post 
  * @access public
  */
