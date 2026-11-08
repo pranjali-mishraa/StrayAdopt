@@ -1,29 +1,25 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import PetCard from "../../Components/PetCard"; 
 import { getNgoHighlights, getNgoPosts, getNgoProfile } from "../services/ngoService";
+import ProfileHeader from "../components/ProfileHeader";
+import HighlightsRow from "../components/HighlightsRow";
+import MediaViewer from "../components/MediaViewer";
+import PostsGrid from "../components/PostsGrid";
 
-function MediaTile({ item }) {
-  const hoursLeft =
-    item.contentType === "story"
-      ? Math.max(0, Math.ceil((new Date(item.expiresAt) - Date.now()) / 36e5))
-      : null;
-
+function ProfileSkeleton() {
   return (
-    <div className="bg-white border border-border-brand rounded-2xl overflow-hidden">
-      <div className="relative aspect-square bg-warm">
-        {item.mediaType === "video" ? (
-          <video src={item.mediaUrl} controls className="w-full h-full object-cover" />
-        ) : (
-          <img src={item.mediaUrl} alt={item.caption || "NGO update"} className="w-full h-full object-cover" />
-        )}
-        {hoursLeft !== null && (
-          <span className="absolute top-3 left-3 text-[11px] uppercase tracking-wide bg-black/60 text-white px-2.5 py-1 rounded-full">
-            Story · {hoursLeft}h left
-          </span>
-        )}
+    <div className="max-w-4xl mx-auto px-4 py-10 animate-pulse">
+      <div className="flex flex-col sm:flex-row items-center gap-8">
+        <div className="w-32 h-32 rounded-full bg-warm" />
+        <div className="flex-1 w-full space-y-3">
+          <div className="h-6 w-1/2 bg-warm rounded" />
+          <div className="h-4 w-1/3 bg-warm rounded" />
+          <div className="h-16 w-full bg-warm rounded" />
+        </div>
       </div>
-      {item.caption && <p className="p-4 text-[14px] text-text-mid">{item.caption}</p>}
+      <div className="grid grid-cols-3 gap-1 sm:gap-3 mt-12">
+        {Array.from({ length: 6 }).map((_, i) => <div key={i} className="aspect-square bg-warm" />)}
+      </div>
     </div>
   );
 }
@@ -32,14 +28,22 @@ export default function NgoProfile() {
   const { id } = useParams();
   const [ngo, setNgo] = useState(null);
   const [highlights, setHighlights] = useState([]);
-  const [posts, setPosts] = useState([]);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const [posts, setPosts] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalPosts, setTotalPosts] = useState(0);
+  const [loadingPosts, setLoadingPosts] = useState(true);
+  const [postsError, setPostsError] = useState("");
+
+  const [viewer, setViewer] = useState(null); // { items, index }
+
   useEffect(() => {
     setLoading(true);
+    setError("");
+    setPage(1);
     Promise.all([getNgoProfile(id), getNgoHighlights(id)])
       .then(([profile, media]) => {
         setNgo(profile.ngo);
@@ -50,96 +54,95 @@ export default function NgoProfile() {
   }, [id]);
 
   useEffect(() => {
+    setLoadingPosts(true);
+    setPostsError("");
     getNgoPosts(id, page)
       .then((data) => {
-        setPosts(data.posts || []);
+        setPosts((prev) => (page === 1 ? data.posts || [] : [...prev, ...(data.posts || [])]));
         setTotalPages(data.totalPages || 1);
+        setTotalPosts(data.total || 0);
       })
-      .catch(() => setPosts([]));
+      .catch((err) => setPostsError(err?.response?.data?.message || "Could not load posts."))
+      .finally(() => setLoadingPosts(false));
   }, [id, page]);
 
-  if (loading) {
-    return <div className="min-h-screen bg-cream flex items-center justify-center text-text-mid">Loading...</div>;
-  }
+  // Server returns newest first; viewers play oldest first, like Instagram
+  const stories = useMemo(
+    () => highlights.filter((h) => h.contentType === "story").reverse(),
+    [highlights]
+  );
+  const permanent = useMemo(
+    () => highlights.filter((h) => h.contentType === "highlight"),
+    [highlights]
+  );
+
+  if (loading) return <div className="min-h-screen bg-cream"><ProfileSkeleton /></div>;
 
   if (error || !ngo) {
     return (
-      <div className="min-h-screen bg-cream flex flex-col items-center justify-center gap-4">
+      <div className="min-h-screen bg-cream flex flex-col items-center justify-center gap-4 px-6 text-center">
         <p className="text-text-mid">{error || "NGO not found."}</p>
         <Link to="/pets" className="text-rust font-medium hover:underline">Back to Explore</Link>
       </div>
     );
   }
 
-  const stories = highlights.filter((h) => h.contentType === "story");
-  const permanent = highlights.filter((h) => h.contentType === "highlight");
+  const joined = new Date(ngo.createdAt).toLocaleDateString("en-IN", { month: "short", year: "numeric" });
+
+  const actions = (
+    <>
+      {ngo.contact?.phone && (
+        <a href={`tel:${ngo.contact.phone}`} className="h-9 px-5 inline-flex items-center bg-rust hover:bg-rust-hover text-white rounded-lg text-sm font-medium transition-colors">
+          Call
+        </a>
+      )}
+      {ngo.contact?.website && (
+        <a href={ngo.contact.website} target="_blank" rel="noreferrer" className="h-9 px-5 inline-flex items-center border border-border-brand text-bark-dark hover:bg-warm rounded-lg text-sm font-medium transition-colors">
+          Website
+        </a>
+      )}
+    </>
+  );
 
   return (
-    <div className="min-h-screen bg-cream px-6 py-12">
-      <div className="max-w-6xl mx-auto space-y-14">
-        {/* Header */}
-        <div className="bg-white border border-border-brand rounded-3xl p-8 flex flex-wrap gap-6 items-start">
-          <img src={ngo.image} alt={ngo.name} className="w-28 h-28 rounded-full object-cover border border-border-brand" />
-          <div className="flex-1 min-w-[240px]">
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="font-display text-3xl font-semibold text-bark-dark">{ngo.name}</h1>
-              <span className="text-[11px] uppercase tracking-wide bg-sage-light text-bark-dark px-3 py-1 rounded-full">Verified NGO</span>
-            </div>
-            <p className="text-text-mid leading-relaxed mb-4">{ngo.description}</p>
-            <div className="text-[14px] text-text-mid space-y-1">
-              {ngo.address && <p>{ngo.address}</p>}
-              {ngo.contact?.phone && <p>{ngo.contact.phone}</p>}
-              {ngo.contact?.website && (
-                <a href={ngo.contact.website} target="_blank" rel="noreferrer" className="text-rust hover:underline">
-                  {ngo.contact.website}
-                </a>
-              )}
-            </div>
-          </div>
-        </div>
+    <div className="min-h-screen bg-cream">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-10">
+        <ProfileHeader
+          ngo={ngo}
+          hasStories={stories.length > 0}
+          onAvatarClick={() => setViewer({ items: stories, index: 0 })}
+          actions={actions}
+          stats={[
+            { label: "posts", value: totalPosts },
+            { label: "highlights", value: permanent.length },
+            { label: "joined", value: joined },
+          ]}
+        />
 
-        {stories.length > 0 && (
-          <section>
-            <h2 className="font-display text-2xl font-semibold text-bark-dark mb-6">Stories</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-              {stories.map((item) => <MediaTile key={item._id} item={item} />)}
-            </div>
-          </section>
-        )}
+        <HighlightsRow items={permanent} onOpen={(i) => setViewer({ items: permanent, index: i })} />
 
-        {permanent.length > 0 && (
-          <section>
-            <h2 className="font-display text-2xl font-semibold text-bark-dark mb-6">Highlights</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-              {permanent.map((item) => <MediaTile key={item._id} item={item} />)}
-            </div>
-          </section>
-        )}
+        <section className="border-t border-border-brand pt-6">
+          <h2 className="text-center text-[12px] uppercase tracking-[0.2em] text-text-mid mb-6">Pets looking for a home</h2>
 
-        <section>
-          <h2 className="font-display text-2xl font-semibold text-bark-dark mb-6">Pets looking for a home</h2>
-          {posts.length === 0 ? (
-            <p className="text-text-mid">No adoption posts yet.</p>
+          {postsError ? (
+            <p className="text-center text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg px-3 py-2">{postsError}</p>
+          ) : loadingPosts && posts.length === 0 ? (
+            <div className="grid grid-cols-3 gap-1 sm:gap-3">
+              {Array.from({ length: 6 }).map((_, i) => <div key={i} className="aspect-square bg-warm animate-pulse" />)}
+            </div>
+          ) : posts.length === 0 ? (
+            <p className="text-center text-text-mid py-16">No adoption posts yet.</p>
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-                {posts.map((post) => <PetCard key={post._id} post={post} />)}
-              </div>
-
-              {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-4 mt-12">
+              <PostsGrid posts={posts} />
+              {page < totalPages && (
+                <div className="flex justify-center mt-8">
                   <button
-                    onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}
-                    className="px-5 h-10 border border-border-brand rounded-full text-sm disabled:opacity-40"
+                    onClick={() => setPage((p) => p + 1)}
+                    disabled={loadingPosts}
+                    className="h-11 px-8 border border-border-brand rounded-full text-sm font-medium text-bark-dark hover:border-rust disabled:opacity-50 transition-colors"
                   >
-                    Previous
-                  </button>
-                  <span className="text-sm text-text-mid">Page {page} of {totalPages}</span>
-                  <button
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}
-                    className="px-5 h-10 border border-border-brand rounded-full text-sm disabled:opacity-40"
-                  >
-                    Next
+                    {loadingPosts ? "Loading..." : "Load more"}
                   </button>
                 </div>
               )}
@@ -147,6 +150,15 @@ export default function NgoProfile() {
           )}
         </section>
       </div>
+
+      {viewer && (
+        <MediaViewer
+          items={viewer.items}
+          startIndex={viewer.index}
+          ngo={ngo}
+          onClose={() => setViewer(null)}
+        />
+      )}
     </div>
   );
 }

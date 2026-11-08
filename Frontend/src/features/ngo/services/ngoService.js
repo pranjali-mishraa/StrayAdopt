@@ -52,3 +52,13 @@ export async function getNgoHighlights(id) {
   const response = await api.get(`/api/ngo/${id}/highlights`);
   return response.data;
 }
+
+export async function toggleNgoPostStatus(id) {
+  const response = await api.patch(`/api/ngo/posts/${id}/status`);
+  return response.data;
+}
+
+export async function deleteNgoPost(id) {
+  const response = await api.delete(`/api/ngo/posts/${id}`);
+  return response.data;
+}

@@ -49,3 +49,8 @@
     -webkit-font-smoothing: antialiased;
   }
 }
+
+@keyframes story-progress {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
