@@ -15,7 +15,7 @@ import MediaThumb from "../components/MediaThumb";
 import PostsGrid from "../components/PostsGrid";
 import PostManageMenu from "../components/PostManageMenu";
 import UploadMediaModal from "../components/UploadMediaModal";
-import ConfirmModal from "../../createPost/ConfirmModel"; // adjust name and path
+import ConfirmModal from "../../createPost/ConfirmModel"; 
 
 const TABS = [
   { key: "profile", label: "Profile" },
@@ -264,7 +264,7 @@ export default function NgoDashboard() {
       <button type="button" disabled={!isVerified} onClick={() => setUploadType("story")} className={secondaryBtn}>
         Add story
       </button>
-      {isVerified && <Link to={`/ngos/${ngoId}`} className={secondaryBtn}>Public profile</Link>}
+     
     </>
   );
 
@@ -320,11 +320,7 @@ export default function NgoDashboard() {
         {tab === "profile" && (
           <div className="grid gap-6 md:grid-cols-2">
             <Card title="Contact">
-              <Row label="Phone">
-                {view.contact?.phone && (
-                  <a href={`tel:${view.contact.phone}`} className="text-rust hover:underline">{view.contact.phone}</a>
-                )}
-              </Row>
+            
               <Row label="Website">
                 {view.contact?.website && (
                   <a href={view.contact.website} target="_blank" rel="noreferrer" className="text-rust hover:underline">
@@ -458,7 +454,6 @@ export default function NgoDashboard() {
             </Card>
 
             <div className="flex flex-wrap gap-3">
-              {isVerified && <Link to={`/ngos/${ngoId}`} className={secondaryBtn}>View public profile</Link>}
               <button
                 type="button"
                 onClick={handleLogout}

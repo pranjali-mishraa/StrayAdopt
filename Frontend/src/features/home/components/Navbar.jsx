@@ -74,12 +74,7 @@ export default function Navbar() {
 
           {!loading && ngo && (
             <>
-              <Link
-                to="/ngo/dashboard"
-                className="text-[15px] font-medium text-text-mid hover:text-bark-dark transition-colors"
-              >
-                NGO Dashboard
-              </Link>
+              
 
               <Link
                 to="/chats"
