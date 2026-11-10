@@ -20,7 +20,6 @@ import ConfirmModal from "../../createPost/ConfirmModel";
 const TABS = [
   { key: "profile", label: "Profile" },
   { key: "posts", label: "Posts" },
-  { key: "stories", label: "Stories" },
   { key: "settings", label: "Settings" },
 ];
 
@@ -391,58 +390,6 @@ export default function NgoDashboard() {
           </section>
         )}
 
-        {/* Stories */}
-        {tab === "stories" && (
-          <div className="space-y-10">
-            {mediaError ? (
-              <ErrorBox message={mediaError} onRetry={loadMedia} />
-            ) : !isVerified ? (
-              <div className="text-center bg-white border border-border-brand rounded-2xl py-16 px-6 text-text-mid">
-                Stories and highlights unlock once an admin approves your NGO.
-              </div>
-            ) : loadingMedia ? (
-              <GridSkeleton count={4} className="aspect-[3/4]" />
-            ) : (
-              <>
-                <section>
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="font-display text-xl font-semibold text-bark-dark">Stories</h2>
-                    <button type="button" onClick={() => setUploadType("story")} className={primaryBtn}>Add story</button>
-                  </div>
-                  {activeStories.length === 0 ? (
-                    <p className="text-text-mid bg-white border border-border-brand rounded-2xl p-8 text-center">
-                      No active stories. Stories disappear after 24 hours.
-                    </p>
-                  ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                      {activeStories.map((item, i) => (
-                        <MediaTile key={item._id} item={item} onOpen={() => setViewer({ items: activeStories, index: i })} />
-                      ))}
-                    </div>
-                  )}
-                </section>
-
-                <section>
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="font-display text-xl font-semibold text-bark-dark">Highlights</h2>
-                    <button type="button" onClick={() => setUploadType("highlight")} className={secondaryBtn}>Add highlight</button>
-                  </div>
-                  {permanent.length === 0 ? (
-                    <p className="text-text-mid bg-white border border-border-brand rounded-2xl p-8 text-center">
-                      No highlights yet. Highlights stay on your profile permanently.
-                    </p>
-                  ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                      {permanent.map((item, i) => (
-                        <MediaTile key={item._id} item={item} onOpen={() => setViewer({ items: permanent, index: i })} />
-                      ))}
-                    </div>
-                  )}
-                </section>
-              </>
-            )}
-          </div>
-        )}
 
         {/* Settings */}
         {tab === "settings" && (

@@ -54,36 +54,23 @@ export default function Navbar() {
         {/* Right side */}
         <div className="flex items-center gap-5">
 
-          {!loading && user && (
-            <>
-              <Link
-                to="/create-post"
-                className="text-[15px] font-medium text-text-mid hover:text-bark-dark transition-colors"
-              >
-                Create Post
-              </Link>
+        {!loading && user && (
+  <Link
+    to="/create-post"
+    className="text-[15px] font-medium text-text-mid hover:text-bark-dark transition-colors"
+  >
+    Create Post
+  </Link>
+)}
 
-              <Link
-                to="/chats"
-                className="text-[15px] font-medium text-text-mid hover:text-bark-dark transition-colors"
-              >
-                Chats
-              </Link>
-            </>
-          )}
-
-          {!loading && ngo && (
-            <>
-              
-
-              <Link
-                to="/chats"
-                className="text-[15px] font-medium text-text-mid hover:text-bark-dark transition-colors"
-              >
-                Chats
-              </Link>
-            </>
-          )}
+{!loading && (user || ngo) && (
+  <Link
+    to="/chats"
+    className="text-[15px] font-medium text-text-mid hover:text-bark-dark transition-colors"
+  >
+    Chats
+  </Link>
+)}
 
           <button
             onClick={handleProfileClick}

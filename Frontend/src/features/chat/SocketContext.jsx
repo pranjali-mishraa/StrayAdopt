@@ -1,9 +1,8 @@
-
 import {
   createContext,
   useContext,
   useEffect,
-  useRef
+  useRef,
 } from "react";
 
 import { io } from "socket.io-client";
@@ -23,18 +22,11 @@ export function SocketProvider({ children }) {
   const socketRef = useRef(null);
 
   useEffect(() => {
-    // Disconnect if no account is logged in
-    if (!user && !ngo) {
-      socketRef.current?.disconnect();
-      socketRef.current = null;
-      return;
-    }
+    const accountType = ngo ? "Ngo" : user ? "User" : null;
 
-    // Do not allow simultaneous account sessions
-    if (user && ngo) {
+    if (!accountType) {
       socketRef.current?.disconnect();
       socketRef.current = null;
-      console.error("Multiple account sessions detected");
       return;
     }
 
@@ -42,12 +34,15 @@ export function SocketProvider({ children }) {
       withCredentials: true,
       autoConnect: true,
       transports: ["websocket", "polling"],
+      auth: {
+        accountType,
+      },
     });
 
     socketRef.current = socket;
 
     socket.on("connect", () => {
-      console.log("Chat socket connected");
+      console.log(`Chat connected as ${accountType}`);
     });
 
     socket.on("connect_error", (error) => {
@@ -62,7 +57,6 @@ export function SocketProvider({ children }) {
       socket.disconnect();
       socketRef.current = null;
     };
-
   }, [user?._id, ngo?._id]);
 
   return (

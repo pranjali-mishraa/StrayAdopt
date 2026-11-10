@@ -1,48 +1,59 @@
+
 const authService = require("../services/auth.service");
 
-// STEP 1: register — creates unverified user, sends OTP, NO cookie yet
+// STEP 1: Register — creates unverified user and sends OTP
 async function registerUserController(req, res) {
     try {
         const { username, email, password } = req.body;
 
         if (!username || !email || !password) {
-            return res.status(400).json({ message: "All fields are required" });
+            return res.status(400).json({
+                message: "All fields are required",
+            });
         }
 
-        const { email: registeredEmail } = await authService.registerUser({ username, email, password });
+        const { email: registeredEmail } =
+            await authService.registerUser({ username, email, password });
 
         return res.status(200).json({
             message: "OTP sent to your email. Please verify to complete registration.",
             email: registeredEmail,
         });
+
     } catch (error) {
         if (error.code === 11000) {
-            return res.status(400).json({ message: "Email already exists" });
+            return res.status(400).json({
+                message: "Email already exists",
+            });
         }
+
         return res.status(error.statusCode || 500).json({
             message: error.message || "Something went wrong",
         });
     }
 }
 
-// STEP 2: verify OTP — marks user verified, sets cookie, returns user + logs them in
+
+// STEP 2: Verify registration OTP — returns JWT instead of setting cookie
 async function verifyRegistrationOtpController(req, res) {
     try {
         const { email, otp } = req.body;
 
         if (!email || !otp) {
-            return res.status(400).json({ message: "Email and OTP are required" });
+            return res.status(400).json({
+                message: "Email and OTP are required",
+            });
         }
 
-        const { token, user } = await authService.verifyRegistrationOtp({ email, otp });
+        const { token, user } =
+            await authService.verifyRegistrationOtp({ email, otp });
 
-        res.cookie("token", token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
+        return res.status(200).json({
+            message: "Account verified successfully",
+            token,
+            user,
         });
 
-        return res.status(200).json({ message: "Account verified successfully", user });
     } catch (error) {
         return res.status(error.statusCode || 500).json({
             message: error.message || "Something went wrong",
@@ -50,18 +61,25 @@ async function verifyRegistrationOtpController(req, res) {
     }
 }
 
-// Resend OTP for an unverified registration
+
+// Resend registration OTP
 async function resendRegistrationOtpController(req, res) {
     try {
         const { email } = req.body;
 
         if (!email) {
-            return res.status(400).json({ message: "Email is required" });
+            return res.status(400).json({
+                message: "Email is required",
+            });
         }
 
         const result = await authService.resendRegistrationOtp(email);
 
-        return res.status(200).json({ message: "OTP resent successfully", email: result.email });
+        return res.status(200).json({
+            message: "OTP resent successfully",
+            email: result.email,
+        });
+
     } catch (error) {
         return res.status(error.statusCode || 500).json({
             message: error.message || "Something went wrong",
@@ -69,30 +87,34 @@ async function resendRegistrationOtpController(req, res) {
     }
 }
 
-// Login — unchanged logic, only verified users can log in
+
+// Login — returns JWT instead of setting cookie
 async function loginUserController(req, res) {
     try {
         const { email, password } = req.body;
 
         if (!email || !password) {
-            return res.status(400).json({ message: "All fields are required" });
+            return res.status(400).json({
+                message: "All fields are required",
+            });
         }
 
-        const { token, user } = await authService.loginUser({ email, password });
+        const { token, user } =
+            await authService.loginUser({ email, password });
 
-        res.cookie("token", token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
+        return res.status(200).json({
+            message: "User logged in successfully",
+            token,
+            user,
         });
 
-        return res.status(200).json({ message: "User logged in successfully", user });
     } catch (error) {
         return res.status(error.statusCode || 500).json({
             message: error.message || "Something went wrong",
         });
     }
 }
+
 
 // FORGOT PASSWORD — step 1: request OTP
 async function requestPasswordResetOtpController(req, res) {
@@ -100,7 +122,9 @@ async function requestPasswordResetOtpController(req, res) {
         const { email } = req.body;
 
         if (!email) {
-            return res.status(400).json({ message: "Email is required" });
+            return res.status(400).json({
+                message: "Email is required",
+            });
         }
 
         const result = await authService.requestPasswordResetOtp(email);
@@ -109,6 +133,7 @@ async function requestPasswordResetOtpController(req, res) {
             message: "If an account exists with this email, an OTP has been sent.",
             email: result.email,
         });
+
     } catch (error) {
         return res.status(error.statusCode || 500).json({
             message: error.message || "Something went wrong",
@@ -116,18 +141,26 @@ async function requestPasswordResetOtpController(req, res) {
     }
 }
 
-// FORGOT PASSWORD — step 2: verify OTP, get a short-lived reset token
+
+// FORGOT PASSWORD — step 2: verify OTP
 async function verifyPasswordResetOtpController(req, res) {
     try {
         const { email, otp } = req.body;
 
         if (!email || !otp) {
-            return res.status(400).json({ message: "Email and OTP are required" });
+            return res.status(400).json({
+                message: "Email and OTP are required",
+            });
         }
 
-        const { resetToken } = await authService.verifyPasswordResetOtp({ email, otp });
+        const { resetToken } =
+            await authService.verifyPasswordResetOtp({ email, otp });
 
-        return res.status(200).json({ message: "OTP verified", resetToken });
+        return res.status(200).json({
+            message: "OTP verified",
+            resetToken,
+        });
+
     } catch (error) {
         return res.status(error.statusCode || 500).json({
             message: error.message || "Something went wrong",
@@ -135,18 +168,24 @@ async function verifyPasswordResetOtpController(req, res) {
     }
 }
 
-// FORGOT PASSWORD — step 3: set new password using the reset token
+
+// FORGOT PASSWORD — step 3: reset password
 async function resetPasswordController(req, res) {
     try {
         const { resetToken, newPassword } = req.body;
 
         if (!resetToken || !newPassword) {
-            return res.status(400).json({ message: "Reset token and new password are required" });
+            return res.status(400).json({
+                message: "Reset token and new password are required",
+            });
         }
 
         await authService.resetPassword({ resetToken, newPassword });
 
-        return res.status(200).json({ message: "Password reset successfully. Please log in." });
+        return res.status(200).json({
+            message: "Password reset successfully. Please log in.",
+        });
+
     } catch (error) {
         return res.status(error.statusCode || 500).json({
             message: error.message || "Something went wrong",
@@ -154,25 +193,39 @@ async function resetPasswordController(req, res) {
     }
 }
 
+
+// Get currently authenticated user
 async function getMeController(req, res) {
-    return res.status(200).json({ user: req.user });
+    return res.status(200).json({
+        user: req.user,
+    });
 }
 
+
+// Logout — blacklist only the current tab's Bearer token
 async function logoutUserController(req, res) {
     try {
-        const token = req.cookies.token;
+        const token = req.authToken;
+
+        if (!token) {
+            return res.status(401).json({
+                message: "Authentication token missing",
+            });
+        }
+
         await authService.logoutUser(token);
-        res.clearCookie("token", {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
+
+        return res.status(200).json({
+            message: "Logged out successfully",
         });
 
-        return res.status(200).json({ message: "Logged out successfully" });
     } catch (error) {
-        return res.status(500).json({ message: "Something went wrong", error: error.message });
+        return res.status(error.statusCode || 500).json({
+            message: error.message || "Something went wrong",
+        });
     }
 }
+
 
 module.exports = {
     registerUserController,

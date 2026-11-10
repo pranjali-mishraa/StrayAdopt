@@ -17,27 +17,59 @@ function initSocket(server) {
     io.use(async (socket, next) => {
         try {
             const rawCookie = socket.handshake.headers.cookie;
-
+    
             if (!rawCookie) {
                 return next(new Error("Not authorized"));
             }
-
+    
             const parsedCookies = cookie.parse(rawCookie);
-            const token = parsedCookies.token;
-
-            if (!token) {
-                return next(new Error("Not authorized"));
+            const accountType = socket.handshake.auth?.accountType;
+    
+            let token;
+            let account;
+    
+            if (accountType === "User") {
+                token = parsedCookies.token;
+    
+                if (!token) {
+                    return next(new Error("User session not found"));
+                }
+    
+                const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+                account = await userModel.findById(decoded.id);
+    
+            } else if (accountType === "Ngo") {
+                token = parsedCookies.ngoToken;
+    
+                if (!token) {
+                    return next(new Error("NGO session not found"));
+                }
+    
+                const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+                const ngoModel = require("../models/ngo.model");
+    
+                account = await ngoModel.findOne({
+                    _id: decoded.id,
+                    verificationStatus: "verified",
+                });
+    
+            } else {
+                return next(new Error("Invalid account type"));
             }
-
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            const user = await userModel.findById(decoded.id);
-
-            if (!user) {
-                return next(new Error("Not authorized"));
+    
+            if (!account) {
+                return next(new Error("Account not found or not authorized"));
             }
-
-            socket.user = user;
+    
+            socket.chatUser = {
+                id: account._id,
+                model: accountType,
+            };
+    
             next();
+    
         } catch (error) {
             next(new Error("Not authorized"));
         }
