@@ -165,21 +165,39 @@ async function loginUser({ email, password }) {
     };
 }
 
-async function logoutUser(token){
 
-    if(!token){
-      const error = new Error("token not provided")
-      error.statusCode = 400 
-      throw error;
+async function logoutUser(token) {
+    if (!token) {
+        const error = new Error("Token not provided");
+        error.statusCode = 400;
+        throw error;
     }
 
-        const decoded = jwt.decode(token); 
-        await blacklistTokenModel.create({
-            token,
-            expiresAt: new Date(decoded.exp * 1000), 
-        });
-    
+    // Verify token before using its expiry
+    let decoded;
+
+    try {
+        decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+        const error = new Error("Invalid or expired token");
+        error.statusCode = 401;
+        throw error;
+    }
+
+    if (!decoded.id || !decoded.exp) {
+        const error = new Error("Invalid token payload");
+        error.statusCode = 401;
+        throw error;
+    }
+
+    await blacklistTokenModel.create({
+        token,
+        expiresAt: new Date(decoded.exp * 1000),
+    });
+
+    return { message: "Logged out successfully" };
 }
+
 
 // special function for middleware 
 async function isTokenBlacklisted(token) {

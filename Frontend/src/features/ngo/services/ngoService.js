@@ -1,4 +1,4 @@
-import api from "../../auth/services/authService";
+import { ngoApi as api } from "../../auth/services/authService";
 
 const multipart = { headers: { "Content-Type": "multipart/form-data" } };
 
@@ -9,6 +9,7 @@ export async function registerNgo(formData) {
 
 export async function loginNgo({ email, password }) {
   const response = await api.post("/api/ngo/login", { email, password });
+  sessionStorage.setItem("ngoToken", response.data.token);
   return response.data;
 }
 

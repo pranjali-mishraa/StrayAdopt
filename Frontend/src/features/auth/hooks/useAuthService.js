@@ -1,112 +1,128 @@
+
 import { useContext } from "react";
-import { AuthContext } from "../AuthContext"; 
+import { AuthContext } from "../AuthContext";
+
 import {
-  login,
-  register,
-  logout,
-  getMe,
-  verifyRegistrationOtp,
-  resendRegistrationOtp,
-  requestPasswordResetOtp,
-  verifyPasswordResetOtp,
-  resetPassword,
+    login,
+    register,
+    logout,
+    getMe,
+    verifyRegistrationOtp,
+    resendRegistrationOtp,
+    requestPasswordResetOtp,
+    verifyPasswordResetOtp,
+    resetPassword,
 } from "../services/authService";
 
 export const useAuthService = () => {
-  const { user, setUser, loading, setLoading } = useContext(AuthContext);
+    const { user, setUser, loading, setLoading } = useContext(AuthContext);
 
-  const handleLogin = async ({ email, password }) => {
-    setLoading(true);
-    try {
-      const data = await login({ email, password });
-      setUser(data.user);
-    } catch (error) {
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
+    // USER LOGIN
+    const handleLogin = async ({ email, password }) => {
+        setLoading(true);
 
-  const handleRegister = async ({ username, email, password }) => {
-    setLoading(true);
-    try {
-        const data = await register({ username, email, password });
-        return data; 
-    } catch (error) {
-        throw error;
-    } finally {
-        setLoading(false);
-    }
-};
+        try {
+            const data = await login({ email, password });
 
-  const handleLogout = async () => {
-    setLoading(true);
-    try {
-      await logout();
-      setUser(null);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+            // Token is already stored by authService.js
+            setUser(data.user);
 
-  const handleVerifyRegistrationOtp = async ({ email, otp }) => {
-    setLoading(true);
-    try {
-        const data = await verifyRegistrationOtp({ email, otp });
-        setUser(data.user); 
-        return data;
-    } catch (error) {
-        throw error;
-    } finally {
-        setLoading(false);
-    }
-};
+            return data;
+        } finally {
+            setLoading(false);
+        }
+    };
 
-const handleResendRegistrationOtp = async ({ email }) => {
-    try {
+    // USER REGISTRATION
+    const handleRegister = async ({ username, email, password }) => {
+        setLoading(true);
+
+        try {
+            return await register({ username, email, password });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // USER LOGOUT
+    const handleLogout = async () => {
+        setLoading(true);
+
+        try {
+            await logout();
+        } catch (error) {
+            console.error("User logout API failed:", error);
+        } finally {
+            // Clear only this tab's User session
+            sessionStorage.removeItem("userToken");
+            setUser(null);
+            setLoading(false);
+        }
+    };
+
+    // REGISTRATION OTP
+    const handleVerifyRegistrationOtp = async ({ email, otp }) => {
+        setLoading(true);
+
+        try {
+            const data = await verifyRegistrationOtp({ email, otp });
+
+            // Token is already stored by authService.js
+            setUser(data.user);
+
+            return data;
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleResendRegistrationOtp = async ({ email }) => {
         return await resendRegistrationOtp({ email });
-    } catch (error) {
-        throw error;
-    }
-};
+    };
 
-const handleRequestPasswordResetOtp = async ({ email }) => {
-    setLoading(true);
-    try {
-        return await requestPasswordResetOtp({ email });
-    } catch (error) {
-        throw error;
-    } finally {
-        setLoading(false);
-    }
-};
+    // FORGOT PASSWORD
+    const handleRequestPasswordResetOtp = async ({ email }) => {
+        setLoading(true);
 
-const handleVerifyPasswordResetOtp = async ({ email, otp }) => {
-    setLoading(true);
-    try {
-        return await verifyPasswordResetOtp({ email, otp });
-    } catch (error) {
-        throw error;
-    } finally {
-        setLoading(false);
-    }
-};
+        try {
+            return await requestPasswordResetOtp({ email });
+        } finally {
+            setLoading(false);
+        }
+    };
 
-const handleResetPassword = async ({ resetToken, newPassword }) => {
-    setLoading(true);
-    try {
-        return await resetPassword({ resetToken, newPassword });
-    } catch (error) {
-        throw error;
-    } finally {
-        setLoading(false);
-    }
-};
+    const handleVerifyPasswordResetOtp = async ({ email, otp }) => {
+        setLoading(true);
 
-  return { user, setUser , loading,setLoading, handleLogin, handleLogout, handleRegister,
-    handleVerifyRegistrationOtp,handleResendRegistrationOtp, handleRequestPasswordResetOtp,handleVerifyPasswordResetOtp,
-    handleResetPassword
-   };
+        try {
+            return await verifyPasswordResetOtp({ email, otp });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleResetPassword = async ({ resetToken, newPassword }) => {
+        setLoading(true);
+
+        try {
+            return await resetPassword({ resetToken, newPassword });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return {
+        user,
+        setUser,
+        loading,
+        setLoading,
+        handleLogin,
+        handleLogout,
+        handleRegister,
+        handleVerifyRegistrationOtp,
+        handleResendRegistrationOtp,
+        handleRequestPasswordResetOtp,
+        handleVerifyPasswordResetOtp,
+        handleResetPassword,
+    };
 };
