@@ -51,19 +51,23 @@ export async function login({ email, password }) {
         password,
     });
 
-    // Save User token in this tab
     sessionStorage.setItem("userToken", response.data.token);
+    sessionStorage.setItem("activeAccount", "User");
 
     return response.data;
 }
 
 export async function logout() {
-    const response = await userApi.post("/api/auth/logout");
+    try {
+        const response = await userApi.post("/api/auth/logout");
+        return response.data;
+    } finally {
+        sessionStorage.removeItem("userToken");
 
-    // Clear only this tab's User token
-    sessionStorage.removeItem("userToken");
-
-    return response.data;
+        if (sessionStorage.getItem("activeAccount") === "User") {
+            sessionStorage.removeItem("activeAccount");
+        }
+    }
 }
 
 export async function getMe() {
@@ -77,8 +81,8 @@ export async function verifyRegistrationOtp({ email, otp }) {
         { email, otp }
     );
 
-    // OTP verification also returns a login token
     sessionStorage.setItem("userToken", response.data.token);
+    sessionStorage.setItem("activeAccount", "User");
 
     return response.data;
 }

@@ -6,18 +6,36 @@ const API_URL =
 
 const conversationAPI = axios.create({
     baseURL: `${API_URL}/api/conversations`,
-    withCredentials: true,
+    withCredentials: false,
     headers: {
         "Content-Type": "application/json",
     },
 });
 
+// Attach the token belonging to the active account in this tab
+conversationAPI.interceptors.request.use((config) => {
+    const activeAccount = sessionStorage.getItem("activeAccount");
+
+    let token = null;
+
+    if (activeAccount === "User") {
+        token = sessionStorage.getItem("userToken");
+    } else if (activeAccount === "Ngo") {
+        token = sessionStorage.getItem("ngoToken");
+    }
+
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    } else {
+        delete config.headers.Authorization;
+    }
+
+    return config;
+});
+
 
 // Start a new conversation or retrieve an existing one
-export async function startConversation(
-    otherUserId,
-    otherUserModel
-) {
+export async function startConversation(otherUserId, otherUserModel) {
     const { data } = await conversationAPI.post("/", {
         otherUserId,
         otherUserModel,
@@ -54,6 +72,5 @@ export async function sendMessage(conversationId, text) {
 
     return data;
 }
-
 
 export default conversationAPI;

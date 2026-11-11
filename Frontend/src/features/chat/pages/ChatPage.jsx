@@ -62,10 +62,18 @@ export default function ChatPage() {
   const { user } = useAuthService();
   const { ngo } = useContext(NgoAuthContext);
 
-  const currentAccount = user || ngo;
-  const currentAccountId = currentAccount?._id;
-  const currentModel = ngo ? "Ngo" : "User";
+  const activeAccount = sessionStorage.getItem("activeAccount");
 
+const currentAccount =
+    activeAccount === "Ngo"
+        ? ngo
+        : activeAccount === "User"
+            ? user
+            : null;
+
+const currentAccountId = currentAccount?._id;
+
+const currentModel = activeAccount === "Ngo" ? "Ngo" : "User";
   const socketRef = useSocket();
 
   const [conversations, setConversations] = useState([]);

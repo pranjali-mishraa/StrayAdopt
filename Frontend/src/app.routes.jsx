@@ -26,7 +26,7 @@ import ProtectedAdmin from "./features/admin/components/ProtectedAdmin";
 import AdminLogin from "./features/admin/pages/AdminLogin";
 import AdminDashboard from "./features/admin/pages/AdminDashboard";
 import AdminNgoReview from "./features/admin/pages/AdminNgoReview";
-
+import ProtectedChat from "./features/chat/ProtectedChat";
 
 export const router = createBrowserRouter([
   {
@@ -42,10 +42,12 @@ export const router = createBrowserRouter([
       { path: "/profile", element: <Protected><Profile /></Protected> },
       { path: "/create-post", element: <Protected><CreatePost /></Protected> },
       { path: "/edit-post/:id", element: <Protected><EditPost /></Protected> },
-      { path: "/chat", element: <Protected><ChatPage /></Protected> },
-      { path: "/chats", element: <Protected><ChatPage /></Protected> },
-      { path: "/chat/:conversationId", element: <Protected><ChatPage /></Protected> },
 
+
+      { path: "/chat", element: <ProtectedChat><ChatPage /></ProtectedChat> },
+      { path: "/chats", element: <ProtectedChat><ChatPage /></ProtectedChat> },
+      { path: "/chat/:conversationId", element: <ProtectedChat><ChatPage /></ProtectedChat> },
+      
       // NGO routes
       { path: "/ngos/:id", element: <NgoProfile /> },
       { path: "/ngo/register", element: <NgoRegister /> },
