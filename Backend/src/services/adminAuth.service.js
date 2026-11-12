@@ -1,7 +1,12 @@
 
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
 const cloudinary = require("../config/cloudinary");
 const ngoModel = require("../models/ngo.model");
+const adminModel = require("../models/admin.model");
+const blacklistTokenModel = require("../models/blacklistToken.model");
 
 const STATUSES = ["pending", "verified", "rejected"];
 
@@ -10,6 +15,96 @@ function httpError(message, statusCode) {
     error.statusCode = statusCode;
     return error;
 }
+
+// ===============================
+// ADMIN AUTHENTICATION
+// ===============================
+
+function generateAdminToken(admin) {
+    return jwt.sign(
+        {
+            id: admin._id,
+            email: admin.email,
+            role: "admin",
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: "7d" }
+    );
+}
+
+async function loginAdmin({ email, password }) {
+    if (!email || !password) {
+        throw httpError("Email and password are required", 400);
+    }
+
+    const admin = await adminModel
+        .findOne({ email: email.trim().toLowerCase() })
+        .select("+password");
+
+    if (!admin) {
+        throw httpError("Invalid email or password", 401);
+    }
+
+    const isPasswordValid = await bcrypt.compare(
+        password,
+        admin.password
+    );
+
+    if (!isPasswordValid) {
+        throw httpError("Invalid email or password", 401);
+    }
+
+    const token = generateAdminToken(admin);
+
+    const adminData = admin.toObject();
+    delete adminData.password;
+
+    return {
+        token,
+        admin: adminData,
+    };
+}
+
+async function logoutAdmin(token) {
+    if (!token) {
+        throw httpError("Token not provided", 400);
+    }
+
+    let decoded;
+
+    try {
+        decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (error) {
+        throw httpError("Invalid or expired token", 401);
+    }
+
+    if (!decoded.id || decoded.role !== "admin" || !decoded.exp) {
+        throw httpError("Invalid admin token", 401);
+    }
+
+    const alreadyBlacklisted = await blacklistTokenModel.findOne({ token });
+
+    if (!alreadyBlacklisted) {
+        await blacklistTokenModel.create({
+            token,
+            expiresAt: new Date(decoded.exp * 1000),
+        });
+    }
+
+    return { message: "Admin logged out successfully" };
+}
+
+async function isTokenBlacklisted(token) {
+    if (!token) return false;
+
+    const blacklistedToken = await blacklistTokenModel.findOne({ token });
+
+    return Boolean(blacklistedToken);
+}
+
+// ===============================
+// NGO MANAGEMENT
+// ===============================
 
 async function listNgos(status = "pending") {
     if (!STATUSES.includes(status)) {
@@ -35,7 +130,6 @@ async function getNgoForReview(id) {
     return ngo;
 }
 
-// Add secure view and download URLs for verification documents.
 async function getNgoDetails(id) {
     const ngo = (await getNgoForReview(id)).toObject();
 
@@ -118,6 +212,12 @@ async function rejectNgo(id, reason) {
 }
 
 module.exports = {
+    // Admin authentication
+    loginAdmin,
+    logoutAdmin,
+    isTokenBlacklisted,
+
+    // NGO management
     listNgos,
     getNgoDetails,
     approveNgo,

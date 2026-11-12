@@ -1,29 +1,80 @@
-import api from "../../auth/services/authService";
 
+import axios from "axios";
+
+const BASE_URL = import.meta.env.PROD
+  ? "https://strayadopt.onrender.com"
+  : "http://localhost:8000";
+
+// Independent Admin API instance
+const adminApi = axios.create({
+  baseURL: BASE_URL,
+  withCredentials: false,
+});
+
+// Attach Admin token to protected requests
+adminApi.interceptors.request.use((config) => {
+  const token = sessionStorage.getItem("adminToken");
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
+});
+
+// Admin authentication
 export async function loginAdmin({ email, password }) {
-  return (await api.post("/api/admin/login", { email, password })).data;
+  const response = await adminApi.post("/api/admin/login", {
+    email,
+    password,
+  });
+
+  sessionStorage.setItem("adminToken", response.data.token);
+  sessionStorage.setItem("activeAccount", "Admin");
+
+  return response.data;
 }
 
 export async function logoutAdmin() {
-  return (await api.post("/api/admin/logout")).data;
+  try {
+    const response = await adminApi.post("/api/admin/logout");
+    return response.data;
+  } finally {
+    sessionStorage.removeItem("adminToken");
+
+    if (sessionStorage.getItem("activeAccount") === "Admin") {
+      sessionStorage.removeItem("activeAccount");
+    }
+  }
 }
 
 export async function getAdminMe() {
-  return (await api.get("/api/admin/me")).data;
+  const response = await adminApi.get("/api/admin/me");
+  return response.data;
 }
 
+// NGO management
 export async function listNgos(status = "pending") {
-  return (await api.get(`/api/admin/ngos?status=${status}`)).data;
+  const response = await adminApi.get("/api/admin/ngos", {
+    params: { status },
+  });
+  return response.data;
 }
 
 export async function getNgoForReview(id) {
-  return (await api.get(`/api/admin/ngos/${id}`)).data;
+  const response = await adminApi.get(`/api/admin/ngos/${id}`);
+  return response.data;
 }
 
 export async function approveNgo(id) {
-  return (await api.patch(`/api/admin/ngos/${id}/approve`)).data;
+  const response = await adminApi.patch(`/api/admin/ngos/${id}/approve`);
+  return response.data;
 }
 
 export async function rejectNgo(id, reason) {
-  return (await api.patch(`/api/admin/ngos/${id}/reject`, { reason })).data;
+  const response = await adminApi.patch(
+    `/api/admin/ngos/${id}/reject`,
+    { reason }
+  );
+  return response.data;
 }
