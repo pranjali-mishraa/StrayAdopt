@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { createPost } from "../home/services/postService" 
+import { createPost } from "../home/services/postService"
 
 const MAX_IMAGES = 5;
 
-export default function CreatePost() {
+export default function CreatePost({ submitPost = createPost, redirectTo = "/" }) {
   const navigate = useNavigate();
 
   const [images, setImages] = useState([]); // File objects
@@ -56,8 +56,8 @@ export default function CreatePost() {
 
     setLoading(true);
     try {
-      await createPost(formData);
-      navigate("/");
+      await submitPost(formData);
+      navigate(redirectTo);
     } catch (err) {
       setError(err?.response?.data?.message || "Something went wrong. Please try again.");
     } finally {

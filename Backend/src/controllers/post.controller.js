@@ -1,30 +1,36 @@
 const postService = require("../services/post.service")
 
-async function createPostController(req , res){
 
+async function createPostController(req, res) {
     try {
-        const {description , location} = req.body ;
+        const { description, location } = req.body;
 
-    if(!description || !location){
-        return res.status(400).json({
-            message: "Description and message both are required."
-        })
-    }
+        if (!description || !location) {
+            return res.status(400).json({
+                message: "Description and location are required."
+            });
+        }
 
-    const post = await postService.createPost({
-        postBy : req.user._id,
-        description ,
-        location,
-        files :req.files,
-    })
+        const { id, model } = req.postOwner;
 
-    return res.status(200).json({message: " Post created successfully" , post})
+        const post = await postService.createPost({
+            postBy: id,
+            postByModel: model,
+            description,
+            location,
+            files: req.files
+        });
+
+        return res.status(201).json({
+            message: "Post created successfully",
+            post
+        });
+
     } catch (error) {
         return res.status(error.statusCode || 500).json({
-            message: error.message || "Something went wrong",
+            message: error.message || "Something went wrong"
         });
     }
-
 }
 
 async function getLatestPostsController(req , res){
@@ -50,17 +56,25 @@ async function getAllPostsController(req, res) {
 
 async function getMyPostsController(req, res) {
     try {
-        const posts = await postService.getMyPosts(req.user._id);
+        const { id, model } = req.postOwner;
+
+        const posts = await postService.getMyPosts(id, model);
+
         return res.status(200).json({ posts });
+
     } catch (error) {
-        return res.status(500).json({ message: "Something went wrong", error: error.message });
+        return res.status(error.statusCode || 500).json({
+            message: error.message || "Something went wrong"
+        });
     }
 }
 
 async function getPostByIdController(req, res) {
     try {
         const post = await postService.getPostById(req.params.id);
+
         return res.status(200).json({ post });
+
     } catch (error) {
         return res.status(error.statusCode || 500).json({
             message: error.message || "Something went wrong",
@@ -70,7 +84,14 @@ async function getPostByIdController(req, res) {
 
 async function updateDescriptionController(req, res) {
     try {
-        const post = await postService.updateDescription(req.params.id, req.user._id, req.body.description);
+        const { id, model } = req.postOwner;
+       // Update description
+const post = await postService.updateDescription(
+    req.params.id,
+    id,
+    model,
+    req.body.description
+);
         return res.status(200).json({ message: "Description updated", post });
     } catch (error) {
         return res.status(error.statusCode || 500).json({ message: error.message || "Something went wrong" });
@@ -79,7 +100,14 @@ async function updateDescriptionController(req, res) {
 
 async function updateLocationController(req, res) {
     try {
-        const post = await postService.updateLocation(req.params.id, req.user._id, req.body.location);
+        const { id, model } = req.postOwner;
+       // Update location
+const post = await postService.updateLocation(
+    req.params.id,
+    id,
+    model,
+    req.body.location
+);
         return res.status(200).json({ message: "Location updated", post });
     } catch (error) {
         return res.status(error.statusCode || 500).json({ message: error.message || "Something went wrong" });
@@ -90,11 +118,16 @@ async function updateImagesController(req, res) {
     try {
         const keepImages = req.body.keepImages ? JSON.parse(req.body.keepImages) : undefined;
 
-        const post = await postService.updateImages(req.params.id, req.user._id, {
-            newFiles: req.files,
-            keepImages,
-        });
-
+        // Update images
+const post = await postService.updateImages(
+    req.params.id,
+    id,
+    model,
+    {
+        newFiles: req.files,
+        keepImages
+    }
+);
         return res.status(200).json({ message: "Images updated", post });
     } catch (error) {
         return res.status(error.statusCode || 500).json({ message: error.message || "Something went wrong" });
@@ -103,7 +136,13 @@ async function updateImagesController(req, res) {
 
 async function toggleAdoptedStatusController(req, res) {
     try {
-        const post = await postService.toggleAdoptedStatus(req.params.id, req.user._id);
+        const { id, model } = req.postOwner;
+    // Toggle status
+const post = await postService.toggleAdoptedStatus(
+    req.params.id,
+    id,
+    model
+);
         return res.status(200).json({ message: "Status updated", post });
     } catch (error) {
         return res.status(error.statusCode || 500).json({ message: error.message || "Something went wrong" });
@@ -112,7 +151,13 @@ async function toggleAdoptedStatusController(req, res) {
 
 async function deletePostController(req, res) {
     try {
-        await postService.deletePost(req.params.id, req.user._id);
+        const { id, model } = req.postOwner;
+       // Delete
+await postService.deletePost(
+    req.params.id,
+    id,
+    model
+);
         return res.status(200).json({ message: "Post deleted successfully" });
     } catch (error) {
         return res.status(error.statusCode || 500).json({ message: error.message || "Something went wrong" });

@@ -1,45 +1,76 @@
-import api from "../../auth/services/authService";
 
-/**
- * Get all conversations for the logged-in user
- */
-export async function getConversations() {
-  const response = await api.get("/api/conversations");
-  return response.data;
-}
+import axios from "axios";
 
-/**
- * Get all messages for a conversation
- */
-export async function getMessages(conversationId) {
-  const response = await api.get(
-    `/api/conversations/${conversationId}/messages`
-  );
-  return response.data;
-}
+const API_URL =
+    import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-/**
- * Start a new conversation or return the existing one
- */
-export async function startConversation(otherUserId) {
-  const response = await api.post("/api/conversations", {
-    otherUserId,
-  });
+const conversationAPI = axios.create({
+    baseURL: `${API_URL}/api/conversations`,
+    withCredentials: false,
+    headers: {
+        "Content-Type": "application/json",
+    },
+});
 
-  return response.data;
-}
+// Attach the token belonging to the active account in this tab
+conversationAPI.interceptors.request.use((config) => {
+    const activeAccount = sessionStorage.getItem("activeAccount");
 
-/**
- * Send a message using the REST API.
- * (Useful as a fallback or if you don't want to use Socket.IO.)
- */
-export async function sendMessage(conversationId, text) {
-  const response = await api.post(
-    `/api/conversations/${conversationId}/messages`,
-    {
-      text,
+    let token = null;
+
+    if (activeAccount === "User") {
+        token = sessionStorage.getItem("userToken");
+    } else if (activeAccount === "Ngo") {
+        token = sessionStorage.getItem("ngoToken");
     }
-  );
 
-  return response.data;
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    } else {
+        delete config.headers.Authorization;
+    }
+
+    return config;
+});
+
+
+// Start a new conversation or retrieve an existing one
+export async function startConversation(otherUserId, otherUserModel) {
+    const { data } = await conversationAPI.post("/", {
+        otherUserId,
+        otherUserModel,
+    });
+
+    return data;
 }
+
+
+// Get all conversations of the logged-in User or NGO
+export async function getMyConversations() {
+    const { data } = await conversationAPI.get("/");
+
+    return data;
+}
+
+
+// Get messages of a particular conversation
+export async function getConversationMessages(conversationId) {
+    const { data } = await conversationAPI.get(
+        `/${conversationId}/messages`
+    );
+
+    return data;
+}
+
+
+// Send a message using REST API
+export async function sendMessage(conversationId, text) {
+    const { data } = await conversationAPI.post(
+        `/${conversationId}/messages`,
+        { text }
+    );
+
+    return data;
+}
+
+export default conversationAPI;
