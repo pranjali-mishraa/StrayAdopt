@@ -5,6 +5,8 @@ import ProfileHeader from "../components/ProfileHeader";
 import HighlightsRow from "../components/HighlightsRow";
 import MediaViewer from "../components/MediaViewer";
 import PostsGrid from "../components/PostsGrid";
+import { useNavigate } from "react-router-dom";
+import { useNgoAuth } from "../hooks/useNgoAuth";
 
 function ProfileSkeleton() {
   return (
@@ -26,6 +28,16 @@ function ProfileSkeleton() {
 
 export default function NgoProfile() {
   const { id } = useParams();
+
+  const navigate = useNavigate();
+const { ngo: loggedInNgo, loading: authLoading } = useNgoAuth();
+
+useEffect(() => {
+  if (!authLoading && loggedInNgo?._id === id) {
+    navigate("/ngo/dashboard", { replace: true });
+  }
+}, [authLoading, loggedInNgo, id, navigate]);
+
   const [ngo, setNgo] = useState(null);
   const [highlights, setHighlights] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -76,8 +88,13 @@ export default function NgoProfile() {
     [highlights]
   );
 
-  if (loading) return <div className="min-h-screen bg-cream"><ProfileSkeleton /></div>;
-
+  if (loading || authLoading) {
+    return (
+      <div className="min-h-screen bg-cream">
+        <ProfileSkeleton />
+      </div>
+    );
+  }
   if (error || !ngo) {
     return (
       <div className="min-h-screen bg-cream flex flex-col items-center justify-center gap-4 px-6 text-center">
@@ -91,13 +108,13 @@ export default function NgoProfile() {
 
   const actions = (
     <>
-      {ngo.contact?.phone && (
-        <a href={`tel:${ngo.contact.phone}`} className="h-9 px-5 inline-flex items-center bg-rust hover:bg-rust-hover text-white rounded-lg text-sm font-medium transition-colors">
-          Call
-        </a>
-      )}
       {ngo.contact?.website && (
-        <a href={ngo.contact.website} target="_blank" rel="noreferrer" className="h-9 px-5 inline-flex items-center border border-border-brand text-bark-dark hover:bg-warm rounded-lg text-sm font-medium transition-colors">
+        <a
+          href={ngo.contact.website}
+          target="_blank"
+          rel="noreferrer"
+          className="h-9 px-5 inline-flex items-center border border-border-brand text-bark-dark hover:bg-warm rounded-lg text-sm font-medium transition-colors"
+        >
           Website
         </a>
       )}
